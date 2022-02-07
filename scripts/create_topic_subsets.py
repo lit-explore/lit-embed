@@ -13,7 +13,7 @@ with open(snakemake.input[0]) as fp:
 for line in lines:
     article = ujson.loads(line)
 
-    if len(article_subset) == snakemake.config['topic_subsets']['max_articles_per_topic']:
+    if len(article_subset) == (snakemake.config['topic_subsets']['max_articles_per_topic'] + 1):
         break
                 
     article_text = (article['title'] + " " + article['abstract']).lower()
