@@ -1,0 +1,26 @@
+#
+# lit-embed example config
+#
+
+# base output directory
+out_dir: "/data/lit-embed"
+
+# random seed
+random_seed: 321
+
+# development mode; if enabled, only a subset of articles are analyzed
+dev_mode:
+  enabled: false
+  num_articles: 500
+
+# minimum number of times a word must appear in corpus, in order to be included
+# in the word count & tf-idf outputs
+min_word_freq: 5
+
+# topic-specific article analysis settings;
+topic_subsets:
+  # list of keywords to use to create topic subsets
+  topics: ['cancer', 'bacteria', 'quark', 'symmetry']
+
+  # maximum number of articles to include, per keyword/topic?
+  max_articles_per_topic: 1000
