@@ -1,5 +1,5 @@
 # source: gensim.parsing.preprocessing.STOPWORDS
-STOP_WORDS = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'again',
+GENSIM_STOP_WORDS = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'again',
         'against', 'all', 'almost', 'alone', 'along', 'already', 'also', 'although',
         'always', 'am', 'among', 'amongst', 'amoungst', 'amount', 'an', 'and',
         'another', 'any', 'anyhow', 'anyone', 'anything', 'anyway', 'anywhere', 'are',
@@ -40,3 +40,7 @@ STOP_WORDS = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'again',
         'whom', 'whose', 'why', 'will', 'with', 'within', 'without', 'would', 'yet',
         'you', 'your', 'yours', 'yourself', 'yourselves']
 
+STOP_WORDS = GENSIM_STOP_WORDS + ['solution', 'solutions', 'equation', 'equations',
+        'theory', 'non', 'problem', 'problems', 'model', 'case', 'method', 'study',
+        'result', 'results', 'term', 'terms', 'paper', 'consider', 'terms', 'shown',
+        'obtain', 'approach', 'prove', 'present']
