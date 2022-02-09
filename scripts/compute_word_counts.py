@@ -32,6 +32,6 @@ df.columns = ["word", "n"]
 df = df.sort_values("n", ascending=False)
 
 # exclude any words which only appear once
-df = df[df.n >= snakemake.config["min_word_freq"]]
+df = df[df.n > 1]
 
 df.to_csv(snakemake.output[0], index=False)

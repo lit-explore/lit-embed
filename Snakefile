@@ -10,8 +10,8 @@ rule all:
         os.path.join(config['out_dir'], "models/biobert-v1.1/pytorch_model.bin"),
         expand(os.path.join(config['out_dir'], "data/arxiv/topics/{topic}.json"), topic=config['topic_subsets']['topics']),
         os.path.join(config['out_dir'], "data/arxiv/arxiv-word-counts.csv"),
-        os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf.npz"),
-        os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf.features.txt"),
+        os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf.feather"),
+        os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf-clusters.feather"),
         expand(os.path.join(config['out_dir'], "embeddings/arxiv/biobert/{topic}.npz"), topic=config['topic_subsets']['topics'])
 
 rule create_biobert_embeddings:
@@ -29,12 +29,18 @@ if config['dev_mode']['enabled']:
 else:
     arxiv_input = os.path.join(config['out_dir'], "data/arxiv/arxiv-metadata-oai-snapshot.json")
 
+rule compute_tfidf_clusters:
+    input:
+        os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf.feather"),
+    output:
+        os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf-clusters.feather"),
+    script: "scripts/compute_tfidf_clusters.py"
+
 rule compute_tfidf_matrix:
     input:
         arxiv_input
     output:
-        os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf.npz"),
-        os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf.features.txt")
+        os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf.feather"),
     script: "scripts/compute_tfidf_matrix.py"
 
 rule compute_word_counts:

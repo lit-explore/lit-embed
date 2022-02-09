@@ -13,9 +13,18 @@ dev_mode:
   enabled: false
   num_articles: 500
 
-# minimum number of times a word must appear in corpus, in order to be included
-# in the word count & tf-idf outputs
-min_word_freq: 5
+# word frequency / tf-idf settings
+word_freq:
+  # minimum/maximum number or proportion of articles which must include a term for it to
+  # be used in tf-idf matrix generation
+  min_df: 10
+  max_df: 0.6
+  # maximum number of features to keep in tf-idf transformed data
+  max_features: 1000
+
+tokenization:
+  #lemmatize: true
+  min_length: 2
 
 # topic-specific article analysis settings;
 topic_subsets:
@@ -24,3 +33,8 @@ topic_subsets:
 
   # maximum number of articles to include, per keyword/topic?
   max_articles_per_topic: 1000
+
+# clustering parameters (mini-batch kmeans)
+clustering:
+  num_clusters: 10
+  batch_size: 8192

@@ -2,5 +2,3 @@
 .mypy_cache
 __pycache__
 config.yml
-todo.md
-
