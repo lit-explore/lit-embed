@@ -40,7 +40,11 @@ GENSIM_STOP_WORDS = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'ag
         'whom', 'whose', 'why', 'will', 'with', 'within', 'without', 'would', 'yet',
         'you', 'your', 'yours', 'yourself', 'yourselves']
 
-STOP_WORDS = GENSIM_STOP_WORDS + ['data', 'based' 'solution', 'solutions', 'equation',
-        'equations', 'mathbb', 'theory', 'non', 'problem', 'problems', 'model', 'case',
-        'method', 'study', 'result', 'results', 'term', 'terms', 'paper', 'consider',
-        'terms', 'shown', 'obtain', 'approach', 'prove', 'present']
+STOP_WORDS = GENSIM_STOP_WORDS + ['10', 'analysis', 'approach', 'based', 'case',
+        'consider', 'data', 'demonstrate', 'different', 'equation', 'equations',
+        'given', 'important', 'including', 'investigate', 'known', 'like', 'mathbb',
+        'mathcal', 'mathrm', 'method', 'methods', 'model', 'new', 'non', 'observed',
+        'obtain', 'obtained', 'paper', 'parameter', 'parameters', 'possible', 'present',
+        'problem', 'problems', 'properties', 'propose', 'prove', 'provide', 'recent',
+        'result', 'results', 'set', 'shown', 'solution', 'solutions', 'study', 'term',
+        'terms', 'theory', 'type', 'use']
