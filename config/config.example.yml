@@ -11,7 +11,7 @@ random_seed: 321
 # development mode; if enabled, only a subset of articles are analyzed
 dev_mode:
   enabled: false
-  num_articles: 500
+  num_articles: 1000
 
 # word frequency / tf-idf settings
 word_freq:
@@ -38,3 +38,7 @@ topic_subsets:
 clustering:
   num_clusters: 10
   batch_size: 8192
+
+# t-SNE article visualization
+tsne:
+  subsample: 5000

@@ -12,6 +12,7 @@ rule all:
         os.path.join(config['out_dir'], "data/arxiv/arxiv-word-counts.csv"),
         os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf.feather"),
         os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf-clusters.feather"),
+        os.path.join(config['out_dir'], "fig/arxiv/arxiv-tfidf-tsne.png"),
         expand(os.path.join(config['out_dir'], "embeddings/arxiv/biobert/{topic}.npz"), topic=config['topic_subsets']['topics'])
 
 rule create_biobert_embeddings:
@@ -28,6 +29,15 @@ if config['dev_mode']['enabled']:
     arxiv_input = os.path.join(config['out_dir'], "data/arxiv/arxiv-metadata-oai-snapshot-subset.json")
 else:
     arxiv_input = os.path.join(config['out_dir'], "data/arxiv/arxiv-metadata-oai-snapshot.json")
+
+rule plot_tfidf_tsne:
+    input:
+        os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf.feather"),
+        os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf-clusters.feather"),
+    output:
+        os.path.join(config['out_dir'], "fig/arxiv/arxiv-tfidf-tsne.png"),
+    script:
+        "scripts/plot_tfidf_tsne.py"
 
 rule compute_tfidf_clusters:
     input:
