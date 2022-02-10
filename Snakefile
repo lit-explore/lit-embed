@@ -9,7 +9,8 @@ rule all:
     input:
         os.path.join(config['out_dir'], "models/biobert-v1.1/pytorch_model.bin"),
         expand(os.path.join(config['out_dir'], "data/arxiv/topics/{topic}.json"), topic=config['topic_subsets']['topics']),
-        os.path.join(config['out_dir'], "data/arxiv/arxiv-word-counts.csv"),
+        os.path.join(config['out_dir'], "data/arxiv/arxiv-word-counts.feather"),
+        os.path.join(config['out_dir'], "data/arxiv/arxiv-word-freq.feather"),
         os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf.feather"),
         os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf-clusters.feather"),
         os.path.join(config['out_dir'], "fig/arxiv/arxiv-tfidf-tsne.png"),
@@ -55,11 +56,18 @@ rule compute_tfidf_matrix:
 
 rule compute_word_counts:
     input:
-        arxiv_input
+        os.path.join(config['out_dir'], "data/arxiv/arxiv-word-freq.feather"),
     output:
-        os.path.join(config['out_dir'], "data/arxiv/arxiv-word-counts.csv")
+        os.path.join(config['out_dir'], "data/arxiv/arxiv-word-counts.feather")
     script:
         "scripts/compute_word_counts.py"
+
+rule compute_word_freq_matrix:
+    input:
+        arxiv_input
+    output:
+        os.path.join(config['out_dir'], "data/arxiv/arxiv-word-freq.feather"),
+    script: "scripts/compute_word_freq_matrix.py"
 
 rule create_topic_subsets:
     input:

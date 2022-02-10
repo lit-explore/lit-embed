@@ -1,9 +1,9 @@
 """
-Computes TF-IDF version of word frequencies
+Computes Word Frequency Matrix 
 """
 import ujson
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 from util.stopwords import STOP_WORDS
 
 # load arxiv articles
@@ -23,8 +23,8 @@ for line in lines:
 min_length = snakemake.config['tokenization']['min_length']
 token_pattern = r"(?u)\b\w{" + str(min_length) + r",}\b"
 
-# get tf-idf sparse matrix
-vectorizer = TfidfVectorizer(max_df=snakemake.config['word_freq']['max_df'],
+# get word frequency matrix
+vectorizer = CountVectorizer(max_df=snakemake.config['word_freq']['max_df'],
                              min_df=snakemake.config['word_freq']['min_df'],
                              max_features=snakemake.config['word_freq']['max_features'],
                              stop_words=STOP_WORDS,

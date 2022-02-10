@@ -16,10 +16,10 @@ dev_mode:
 # word frequency / tf-idf settings
 word_freq:
   # minimum/maximum number or proportion of articles which must include a term for it to
-  # be used in tf-idf matrix generation
+  # be used in matrix generation
   min_df: 10
   max_df: 0.6
-  # maximum number of features to keep in tf-idf transformed data
+  # maximum number of features to keep
   max_features: 1000
 
 tokenization:

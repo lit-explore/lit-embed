@@ -1,37 +1,11 @@
 """
-Generate a global count of all words appearing in article titles/abstracts.
-
-Eventually, it would also be useful to generate a sparse matrix representation of a
-complete article x [word|term] matrix.
+summary of word counts across all articles
 """
-import ujson
 import pandas as pd
-from util.stopwords import STOP_WORDS
 
-word_counts = {}
+dat = pd.read_feather(snakemake.input[0]).set_index('article_id')
 
-with open(snakemake.input[0]) as fp:
-    lines = fp.readlines()
+total_counts = dat.sum().sort_values(ascending=False).reset_index()
+total_counts.columns = ['word', 'n']
 
-for line in lines:
-    article = ujson.loads(line)
-
-    text = article["title"].lower() + article["abstract"].lower()
-
-    tokens = [x for x in text.split() if x not in STOP_WORDS]
-
-    for token in tokens:
-        if token in word_counts:
-            word_counts[token] += 1
-        else:
-            word_counts[token] = 1
-
-df = pd.DataFrame.from_dict(word_counts, orient="index").reset_index()
-df.columns = ["word", "n"]
-
-df = df.sort_values("n", ascending=False)
-
-# exclude any words which only appear once
-df = df[df.n > 1]
-
-df.to_csv(snakemake.output[0], index=False)
+total_counts.to_feather(snakemake.output[0])
