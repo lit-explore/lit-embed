@@ -8,22 +8,13 @@ configfile: "config/config.yml"
 rule all:
     input:
         os.path.join(config['out_dir'], "models/biobert-v1.1/pytorch_model.bin"),
-        expand(os.path.join(config['out_dir'], "data/arxiv/topics/{topic}.json"), topic=config['topic_subsets']['topics']),
         os.path.join(config['out_dir'], "data/arxiv/arxiv-word-counts.feather"),
         os.path.join(config['out_dir'], "data/arxiv/arxiv-word-freq.feather"),
         os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf.feather"),
         os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf-clusters.feather"),
+        os.path.join(config['out_dir'], "data/arxiv/arxiv-biobert-mean.feather"),
         os.path.join(config['out_dir'], "fig/arxiv/arxiv-tfidf-tsne.png"),
-        expand(os.path.join(config['out_dir'], "embeddings/arxiv/biobert/{topic}.npz"), topic=config['topic_subsets']['topics'])
-
-rule create_biobert_embeddings:
-    input:
-        os.path.join(config['out_dir'], "data/arxiv/topics/{topic}.json"),
-        os.path.join(config['out_dir'], "models/biobert-v1.1/pytorch_model.bin")
-    output:
-        os.path.join(config['out_dir'], "embeddings/arxiv/biobert/{topic}.npz")
-    script:
-        "scripts/create_biobert_embeddings.py"
+        os.path.join(config['out_dir'], "fig/arxiv/arxiv-biobert-mean-tsne.png"),
 
 # if "dev_mode" is enabled, subsample articles
 if config['dev_mode']['enabled']:
@@ -31,14 +22,32 @@ if config['dev_mode']['enabled']:
 else:
     arxiv_input = os.path.join(config['out_dir'], "data/arxiv/arxiv-metadata-oai-snapshot.json")
 
-rule plot_tfidf_tsne:
+rule create_biobert_embeddings:
+    input:
+        arxiv_input,
+        os.path.join(config['out_dir'], "models/biobert-v1.1/pytorch_model.bin")
+    output:
+        os.path.join(config['out_dir'], "data/arxiv/arxiv-biobert-mean.feather"),
+    script:
+        "scripts/create_biobert_embeddings.py"
+
+rule plot_article_tfidf_tsne:
     input:
         os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf.feather"),
         os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf-clusters.feather"),
     output:
         os.path.join(config['out_dir'], "fig/arxiv/arxiv-tfidf-tsne.png"),
     script:
-        "scripts/plot_tfidf_tsne.py"
+        "scripts/plot_article_tsne.py"
+
+rule plot_article_biobert_tsne:
+    input:
+        os.path.join(config['out_dir'], "data/arxiv/arxiv-biobert-mean.feather"),
+        os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf-clusters.feather"),
+    output:
+        os.path.join(config['out_dir'], "fig/arxiv/arxiv-biobert-mean-tsne.png"),
+    script:
+        "scripts/plot_article_tsne.py"
 
 rule compute_tfidf_clusters:
     input:
@@ -68,14 +77,6 @@ rule compute_word_freq_matrix:
     output:
         os.path.join(config['out_dir'], "data/arxiv/arxiv-word-freq.feather"),
     script: "scripts/compute_word_freq_matrix.py"
-
-rule create_topic_subsets:
-    input:
-        arxiv_input 
-    output:
-        os.path.join(config['out_dir'], "data/arxiv/topics/{topic}.json")
-    script:
-        "scripts/create_topic_subsets.py"
 
 if config['dev_mode']['enabled']:
     rule select_arxiv_articles:
