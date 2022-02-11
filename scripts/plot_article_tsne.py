@@ -18,7 +18,9 @@ dat = pd.read_feather(snakemake.input[0]).set_index('article_id')
 clusters = pd.read_feather(snakemake.input[1]).set_index('article_id')
 
 # subsample to speed things up
-ind = random.sample(range(dat.shape[0]), snakemake.config['tsne']['subsample'])
+num_articles = snakemake.config['tsne']['subsample']
+
+ind = random.sample(range(dat.shape[0]), num_articles)
 
 dat = dat.iloc[ind]
 clusters = clusters.iloc[ind]
@@ -33,6 +35,8 @@ tsne_dat.index = dat.index
 # add cluster information
 tsne_dat = pd.concat([tsne_dat, clusters], axis=1)
 
-sns.scatterplot(data=tsne_dat, x="TSNE1", y="TSNE2", hue="cluster", s=14)
+plt_title = f"{snakemake.params['title']} (n={num_articles})"
+
+sns.scatterplot(data=tsne_dat, x="TSNE1", y="TSNE2", hue="cluster", s=14).set(title=plt_title)
 
 plt.savefig(snakemake.output[0])

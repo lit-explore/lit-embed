@@ -37,6 +37,8 @@ rule plot_article_tfidf_tsne:
         os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf-clusters.feather"),
     output:
         os.path.join(config['out_dir'], "fig/arxiv/arxiv-tfidf-tsne.png"),
+    params:
+        title="arXiv Article TF-IDF t-SNE"
     script:
         "scripts/plot_article_tsne.py"
 
@@ -46,6 +48,8 @@ rule plot_article_biobert_tsne:
         os.path.join(config['out_dir'], "data/arxiv/arxiv-tfidf-clusters.feather"),
     output:
         os.path.join(config['out_dir'], "fig/arxiv/arxiv-biobert-mean-tsne.png"),
+    params:
+        title="arXiv Article BioBERT Mean Embedding t-SNE"
     script:
         "scripts/plot_article_tsne.py"
 
