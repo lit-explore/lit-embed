@@ -10,7 +10,13 @@ from util.nlp import STOP_WORDS_LEMMA
 dat = pd.read_feather(snakemake.input[0])
 
 ids = dat.id.values
-corpus = dat.text.values
+
+# combine lowercase title + abstract to form corpus
+corpus = []
+
+for index, row in dat.iterrows():
+    text = (row.title + " " + row.abstract).lower()    
+    corpus.append(text)
 
 # default token pattern, modifed to account for minimum token lengths
 min_length = snakemake.config['tokenization']['min_length']

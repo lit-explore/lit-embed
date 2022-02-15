@@ -12,12 +12,18 @@ corpus = pd.read_feather(snakemake.input[0])
 
 # lists to store output row parts
 ids = []
-lemma_texts = []
+dois = []
+lemma_titles = []
+lemma_abstracts = []
 
 # iterate over article texts, and apply lemmatizer
 for ind, article in corpus.iterrows():
     ids.append(article.id)
-    doc = nlp(article.text)
+    dois.append(article.doi)
+
+    # lemmatize title
+    text = article.title.lower()
+    doc = nlp(text)
 
     lemma_words = []
 
@@ -29,8 +35,28 @@ for ind, article in corpus.iterrows():
         for word in sentence.words:
             lemma_words.append(word.lemma)
 
-    lemma_texts.append(" ".join(lemma_words).replace(" .", "."))
+    lemma_titles.append(" ".join(lemma_words).replace(" .", "."))
 
-df = pd.DataFrame({"id": ids, "text": lemma_texts})
+    # lemmatize abstract
+    text = article.abstract.lower()
+    doc = nlp(text)
+
+    lemma_words = []
+
+    if ind % 100 == 0:
+        print(f"Processing article {ind + 1}...")
+
+    for sentence in doc.sentences:
+        for word in sentence.words:
+            lemma_words.append(word.lemma)
+
+    lemma_abstracts.append(" ".join(lemma_words).replace(" .", "."))
+
+df = pd.DataFrame({
+    "id": ids, 
+    "doi": dois, 
+    "title": lemma_titles, 
+    "abstract": lemma_abstracts
+})
 
 df.to_feather(snakemake.output[0])

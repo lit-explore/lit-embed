@@ -35,7 +35,12 @@ tsne_dat.index = dat.index
 # add cluster information
 tsne_dat = pd.concat([tsne_dat, clusters], axis=1)
 
-plt_title = f"{snakemake.params['title']} (n={num_articles})"
+if snakemake.wildcards['source'] == 'arxiv':
+    source = 'arXiv'
+else:
+    source = 'Pubmed'
+
+plt_title = f"{source} Article {snakemake.params['title']} t-SNE (n={num_articles})"
 
 sns.scatterplot(data=tsne_dat, x="TSNE1", y="TSNE2", hue="cluster", s=14).set(title=plt_title)
 
