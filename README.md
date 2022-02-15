@@ -60,10 +60,19 @@ necessary requirements, using:
 create create -n lit-embed --file requirements.txt
 ```
 
+Next, copy the example config file located in the `config/` dir to `config/config.yml`,
+and modify as desired:
+
+```
+cp config/config.example.yml config/config.yml
+```
+
+The `out_dir` parameter indicates where the pipeline should store data and results.
+
 Usage
 -----
 
-To run the pipeline, activate the conda environment, and call `snakemake`, specifying
+To run the pipeline, activate the conda environment and call `snakemake`, specifying
 the desired number of threads to use with the `-j` option, e.g.:
 
 ```

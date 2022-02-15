@@ -23,16 +23,8 @@ word_freq:
   max_features: 1000
 
 tokenization:
-  #lemmatize: true
+  lemmatize: true
   min_length: 2
-
-# topic-specific article analysis settings;
-topic_subsets:
-  # list of keywords to use to create topic subsets
-  topics: ['cancer', 'bacteria', 'quark', 'symmetry']
-
-  # maximum number of articles to include, per keyword/topic?
-  max_articles_per_topic: 1000
 
 # clustering parameters (mini-batch kmeans)
 clustering:
