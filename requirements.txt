@@ -16,5 +16,6 @@ jupyter
 ipykernel
 ipywidgets
 nb_conda_kernels
+stanza
 huggingface::transformers
 pytorch::pytorch

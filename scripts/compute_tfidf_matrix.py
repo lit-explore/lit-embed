@@ -4,20 +4,13 @@ Computes TF-IDF version of word frequencies
 import ujson
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
-from util.stopwords import STOP_WORDS
+from util.nlp import STOP_WORDS_LEMMA
 
-# load arxiv articles
-ids = []
-corpus = []
+# load articles
+dat = pd.read_feather(snakemake.input[0])
 
-with open(snakemake.input[0]) as fp:
-    lines = fp.readlines()
-
-for line in lines:
-    article = ujson.loads(line)
-
-    ids.append(article['id'])
-    corpus.append(article['title'].lower() + " " + article['abstract'].lower())
+ids = dat.id.values
+corpus = dat.text.values
 
 # default token pattern, modifed to account for minimum token lengths
 min_length = snakemake.config['tokenization']['min_length']
@@ -27,7 +20,7 @@ token_pattern = r"(?u)\b\w{" + str(min_length) + r",}\b"
 vectorizer = TfidfVectorizer(max_df=snakemake.config['word_freq']['max_df'],
                              min_df=snakemake.config['word_freq']['min_df'],
                              max_features=snakemake.config['word_freq']['max_features'],
-                             stop_words=STOP_WORDS,
+                             stop_words=STOP_WORDS_LEMMA,
                              token_pattern=token_pattern)
 
 mat = vectorizer.fit_transform(corpus)
@@ -37,16 +30,8 @@ feat_names = vectorizer.get_feature_names_out()
 
 # for now, convert to dense matrix for convenience; the "word_freq.max_features" config 
 # param can be used to limit the size of the matrix
-dat = pd.DataFrame(mat.todense(), 
+tfidf_mat = pd.DataFrame(mat.todense(), 
                    index=pd.Series(ids, name='article_id'), 
                    columns=feat_names)
 
-dat.reset_index().to_feather(snakemake.output[0])
-
-# convert to column-oriented (csc) sparse matrix
-#mat = mat.tocsc()
-#sparse.save_npz(snakemake.output[0], mat)
-
-# store feature names in a separate .txt file
-#  with open(snakemake.output[1], 'w') as fp:
-#      fp.write("\n".join(feat_names))
+tfidf_mat.reset_index().to_feather(snakemake.output[0])

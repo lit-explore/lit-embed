@@ -4,6 +4,8 @@ lit-embed
 Overview
 --------
 
+![arxiv tf-idf t-SNE plot](extra/arxiv-lemma-tfidf-tsne.png)
+
 Pipeline to explore alternative approaches to scientific literature embeddings, 
 detection of maximally informative terms associated with different areas of research,
 and to infer and visualize a concept-concept network that refelects the topics of
@@ -13,6 +15,9 @@ Two main sources of open data are explored:
 
 1. [arXiv](https://arxiv.org/)
 2. [Pubmed](https://pubmed.ncbi.nlm.nih.gov/) [not yet implemented]
+
+_Figure_: arXiv TF-IDF t-SNE projected articles and clusters. For each cluster, the the
+most frequent words associated with articles in the cluster are shown.
 
 Learning Objective
 ------------------

@@ -1,3 +1,6 @@
+import stanza
+from stanza.pipeline.core import ResourcesFileNotFoundError
+
 # source: gensim.parsing.preprocessing.STOPWORDS
 GENSIM_STOP_WORDS = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'again',
         'against', 'all', 'almost', 'alone', 'along', 'already', 'also', 'although',
@@ -50,3 +53,21 @@ STOP_WORDS = GENSIM_STOP_WORDS + ['10', 'analysis', 'approach', 'applications', 
         'propose', 'proposed', 'prove', 'provide', 'recent', 'result', 'results', 'set',
         'shown', 'solution', 'solutions', 'study', 'term', 'terms', 'theory', 'type',
         'use', 'work']
+
+# create lemmatized version of stopwords
+try:
+    nlp = stanza.Pipeline(lang='en', processors='tokenize,pos,lemma')
+except ResourcesFileNotFoundError:
+    print("Downloading Stanza English language models for new install..")
+    stanza.download('en')
+    nlp = stanza.Pipeline(lang='en', processors='tokenize,pos,lemma')
+
+doc = nlp(" ".join(STOP_WORDS))
+
+STOP_WORDS_LEMMA = []
+
+for sentence in doc.sentences:
+    for word in sentence.words:
+        STOP_WORDS_LEMMA.append(word.lemma)
+
+STOP_WORDS_LEMMA = set(STOP_WORDS_LEMMA)
