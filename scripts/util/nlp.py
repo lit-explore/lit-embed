@@ -43,16 +43,20 @@ GENSIM_STOP_WORDS = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'ag
         'whom', 'whose', 'why', 'will', 'with', 'within', 'without', 'would', 'yet',
         'you', 'your', 'yours', 'yourself', 'yourselves']
 
-STOP_WORDS = GENSIM_STOP_WORDS + ['10', 'analysis', 'approach', 'applications', 'based',
-        'case', 'consider', 'current', 'data', 'demonstrate', 'different', 'effect',
-        'equation', 'equations', 'function', 'functions', 'given', 'important',
-        'including', 'investigate', 'known', 'large', 'like', 'mathbb', 'mathcal',
-        'mathrm', 'method', 'methods', 'model', 'models', 'new', 'non', 'observed',
-        'obtain', 'obtained', 'paper', 'parameter', 'parameters', 'particular',
-        'performance', 'possible', 'present', 'problem', 'problems', 'properties',
-        'propose', 'proposed', 'prove', 'provide', 'recent', 'result', 'results', 'set',
-        'shown', 'solution', 'solutions', 'study', 'term', 'terms', 'theory', 'type',
-        'use', 'work']
+STOP_WORDS = GENSIM_STOP_WORDS + ['10', 'analysis', 'applications', 'approach',
+        'associated', 'based', 'case', 'compared', 'consider', 'current', 'data',
+        'demonstrate', 'different', 'effect', 'effective', 'effects', 'equation',
+        'equations', 'evidence', 'examined', 'findings', 'following', 'function',
+        'functions', 'given', 'identified', 'important', 'including', 'induced',
+        'investigate', 'investigated', 'known', 'large', 'like', 'mathbb', 'mathcal',
+        'mathrm', 'method', 'methods', 'model', 'models', 'new', 'non', 'novel',
+        'observed', 'obtain', 'obtained', 'paper', 'parameter', 'parameters',
+        'particular', 'performance', 'performed', 'possible', 'presence', 'present',
+        'problem', 'problems', 'properties', 'propose', 'proposed', 'prove', 'provide',
+        'range', 'recent', 'related', 'respectively', 'result', 'results', 'revealed',
+        'set', 'showed', 'shown', 'significant', 'significantly', 'solution',
+        'solutions', 'studies', 'study', 'term', 'terms', 'theory', 'type', 'use',
+        'values', 'work']
 
 # create lemmatized version of stopwords
 try:
