@@ -18,7 +18,7 @@ dat = pd.read_feather(snakemake.input[0]).set_index('article_id')
 clusters = pd.read_feather(snakemake.input[1]).set_index('article_id')
 
 # subsample to speed things up
-num_articles = snakemake.config['tsne']['subsample']
+num_articles = min(snakemake.config['tsne']['subsample'], dat.shape[0])
 
 ind = random.sample(range(dat.shape[0]), num_articles)
 

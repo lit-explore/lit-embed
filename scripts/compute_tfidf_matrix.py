@@ -9,6 +9,16 @@ from util.nlp import STOP_WORDS_LEMMA
 # load articles
 dat = pd.read_feather(snakemake.input[0])
 
+# exclude articles with missing abstracts or titles
+if snakemake.config['exclude_articles']['missing_abstract']:
+    dat = dat[~dat.abstract.isna()]
+if snakemake.config['exclude_articles']['missing_title']:
+    dat = dat[~dat.title.isna()]
+
+# fill missing title/abstract fields for any remaining articles with missing components
+dat.title.fillna("", inplace=True)
+dat.abstract.fillna("", inplace=True)
+
 ids = dat.id.values
 
 # combine lowercase title + abstract to form corpus

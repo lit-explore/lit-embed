@@ -10,6 +10,9 @@ nlp = stanza.Pipeline(lang='en', processors='tokenize,pos,lemma')
 # load corpus
 corpus = pd.read_feather(snakemake.input[0])
 
+corpus.abstract.fillna("", inplace=True)
+corpus.title.fillna("", inplace=True)
+
 # lists to store output row parts
 ids = []
 dois = []

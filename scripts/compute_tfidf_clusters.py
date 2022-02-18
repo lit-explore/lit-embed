@@ -10,6 +10,8 @@ dat = pd.read_feather(snakemake.input[0]).set_index('article_id')
 # cluster articles
 num_clusters = snakemake.config['clustering']['num_clusters']
 
+print("Clustering data..")
+
 kmeans = MiniBatchKMeans(num_clusters,
                          batch_size=snakemake.config['clustering']['batch_size'])
 
@@ -18,6 +20,8 @@ clusters = kmeans.fit(dat).labels_
 # for each cluster, generate a cluster label by combining the top 3 tokens associated
 # with the cluster
 cluster_labels = []
+
+print("Generating cluster labels..")
 
 for i in range(num_clusters):
     mask = clusters == i
@@ -33,6 +37,8 @@ for i in range(num_clusters):
 mapping = {i:x for i, x in enumerate(cluster_labels)}
 
 named_clusters = [mapping[x] for x in clusters]
+
+print("Saving clustering results..")
 
 res = pd.DataFrame({"article_id": dat.index, "cluster": named_clusters})
 
