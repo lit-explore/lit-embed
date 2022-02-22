@@ -42,16 +42,22 @@ for ind, article in corpus.iterrows():
 
     # lemmatize abstract
     text = article.abstract.lower()
+
+    # stanza work-around; fails if text is *exactly* the length of the batch size (3000)
+    if len(text) == 3000:
+        text = text + "."
+
     doc = nlp(text)
 
     lemma_words = []
 
-    if ind % 100 == 0:
-        print(f"Processing article {ind + 1}...")
-
     for sentence in doc.sentences:
         for word in sentence.words:
             lemma_words.append(word.lemma)
+
+    # remove extra period added for work-around, if present
+    if len(text) == 3001:
+        lemma_words = lemma_words[:-1]
 
     lemma_abstracts.append(" ".join(lemma_words).replace(" .", "."))
 
@@ -62,4 +68,5 @@ df = pd.DataFrame({
     "abstract": lemma_abstracts
 })
 
+#  df.to_feather(snakemake.output[0])
 df.to_feather(snakemake.output[0])

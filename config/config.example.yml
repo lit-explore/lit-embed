@@ -13,17 +13,35 @@ dev_mode:
   enabled: false
   num_articles: 1000
 
+# arxiv-related settings
+arxiv:
+  # number of chunks to split dataset into for processing
+  num_chunks: 1000
+
+# pubmed-related settings
+pubmed:
+  # start and end number for daily updates
+  # https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
+  updates_start: 1115
+  updates_end: 1191
+
+# factors to use to decide whether to exclude an article from analysis;
+# at present, this only affects downstream operations, starting from word frequency and
+# tf-idf matrix generation
+exclude_articles:
+  missing_abstract: true
+  missing_title: true
+
 # word frequency / tf-idf settings
 word_freq:
   # minimum/maximum number or proportion of articles which must include a term for it to
-  # be used in matrix generation
+  # be used in word-freq/tf-df matrices
   min_df: 10
   max_df: 0.6
   # maximum number of features to keep
   max_features: 1000
 
 tokenization:
-  lemmatize: true
   min_length: 2
 
 # clustering parameters (mini-batch kmeans)

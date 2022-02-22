@@ -7,7 +7,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from util.nlp import STOP_WORDS
 
 # load articles
-dat = pd.read_feather(snakemake.input[0])
+dat = pd.read_csv(snakemake.input[0])
 
 # exclude articles with missing abstracts or titles
 if snakemake.config['exclude_articles']['missing_abstract']:

@@ -5,140 +5,182 @@ import os
 
 configfile: "config/config.yml"
 
+# arxiv article subset ids
+arxiv_num = [f"{n:04}" for n in range(1, config['arxiv']['num_chunks'] + 1)]
+
 # pubmed annual file numbers (2022)
 pubmed_annual = [f"{n:04}" for n in range(1, 1115)]
 
-# pubmed daily update file numbers
-daily_start = config['pubmed']['updates_start']
-daily_end = config['pubmed']['updates_end']
-
-pubmed_daily = [f"{n:04}" for n in range(daily_start, daily_end + 1)]
+# pubmed daily update file numbers (not yet incorporated..)
+# daily_start = config['pubmed']['updates_start']
+# daily_end = config['pubmed']['updates_end']
+#
+# pubmed_daily = [f"{n:04}" for n in range(daily_start, daily_end + 1)]
 
 model_dir = os.path.join(config['out_dir'], 'models')
 input_dir = os.path.join(config['out_dir'], 'input')
 
 # if "dev_mode" is enabled, operate on a subset of articles
 if config['dev_mode']['enabled']:
-    data_dir = os.path.join(config['out_dir'], 'subset')
+    output_dir = os.path.join(config['out_dir'], 'output', 'subsampled', str(config['dev_mode']['num_articles']))
 else:
-    data_dir = os.path.join(config['out_dir'], 'full')
+    output_dir = os.path.join(config['out_dir'], 'output', 'full')
 
+# wildcard values
 data_sources = ['pubmed', 'arxiv']
+processing_versions = ['baseline', 'lemmatized']
+agg_funcs = ['mean', 'median']
 
 rule all:
     input:
-        expand(os.path.join(data_dir, "data/{source}/articles-lemmatized.feather"), source=data_sources),
-        expand(os.path.join(data_dir, "fig/{source}/article-tfidf-tsne.png"), source=data_sources),
-        expand(os.path.join(data_dir, "fig/{source}/article-tfidf-lemmatized-tsne.png"), source=data_sources),
-        expand(os.path.join(data_dir, "data/{source}/word-counts.feather"), source=data_sources),
-        os.path.join(model_dir, "biobert-v1.1/pytorch_model.bin"),
-        # os.path.join(data_dir, "data/arxiv/biobert-mean.feather"),
-        # os.path.join(data_dir, "fig/arxiv/biobert-mean-tsne.png"),
-
-rule create_lemmatized_corpus:
-    input:
-       os.path.join(data_dir, "data/{source}/articles.feather") 
-    output:
-       os.path.join(data_dir, "data/{source}/articles-lemmatized.feather") 
-    script:
-        "scripts/lemmatize_text.py"
-
-rule create_biobert_embeddings:
-    input:
-        os.path.join(data_dir, "data/{source}/articles.feather"),
-        os.path.join(model_dir, "biobert-v1.1/pytorch_model.bin")
-    output:
-        os.path.join(data_dir, "data/{source}/biobert-mean.feather"),
-    script:
-        "scripts/create_biobert_embeddings.py"
-
-rule plot_article_tfidf_lemmatized_tsne:
-    input:
-        os.path.join(data_dir, "data/{source}/tfidf-lemmatized.feather"),
-        os.path.join(data_dir, "data/{source}/tfidf-lemmatized-clusters.feather"),
-    output:
-        os.path.join(data_dir, "fig/{source}/article-tfidf-lemmatized-tsne.png"),
-    params:
-        title="Lemmatized TF-IDF"
-    script:
-        "scripts/plot_article_tsne.py"
+        expand(os.path.join(output_dir, "fig/{source}/article-tfidf-{processing}-tsne.png"), source=data_sources, processing=processing_versions)
 
 rule plot_article_tfidf_tsne:
     input:
-        os.path.join(data_dir, "data/{source}/tfidf.feather"),
-        os.path.join(data_dir, "data/{source}/tfidf-clusters.feather"),
+        os.path.join(output_dir, "data/{source}/tfidf-{processing}.feather"),
+        os.path.join(output_dir, "data/{source}/tfidf-{processing}-clusters.feather"),
     output:
-        os.path.join(data_dir, "fig/{source}/article-tfidf-tsne.png"),
+        os.path.join(output_dir, "fig/{source}/article-tfidf-{processing}-tsne.png"),
     params:
         title="TF-IDF"
     script:
         "scripts/plot_article_tsne.py"
 
-rule plot_article_biobert_tsne:
-    input:
-        os.path.join(data_dir, "data/{source}/biobert-mean.feather"),
-        os.path.join(data_dir, "data/{source}/tfidf-clusters.feather"),
-    output:
-        os.path.join(data_dir, "fig/{source}/article-biobert-tsne.png"),
-    params:
-        title="BioBERT Mean Embedding"
-    script:
-        "scripts/plot_article_tsne.py"
-
-rule compute_tfidf_lemmatized_clusters:
-    input:
-        os.path.join(data_dir, "data/{source}/tfidf-lemmatized.feather"),
-    output:
-        os.path.join(data_dir, "data/{source}/tfidf-lemmatized-clusters.feather"),
-    script: "scripts/compute_tfidf_clusters.py"
-
 rule compute_tfidf_clusters:
     input:
-        os.path.join(data_dir, "data/{source}/tfidf.feather"),
+        os.path.join(output_dir, "data/{source}/tfidf-{processing}.feather"),
     output:
-        os.path.join(data_dir, "data/{source}/tfidf-clusters.feather"),
+        os.path.join(output_dir, "data/{source}/tfidf-{processing}-clusters.feather"),
     script: "scripts/compute_tfidf_clusters.py"
-
-rule compute_tfidf_lemmatized_matrix:
-    input:
-       os.path.join(data_dir, "data/{source}/articles-lemmatized.feather") 
-    output:
-        os.path.join(data_dir, "data/{source}/tfidf-lemmatized.feather"),
-    script: "scripts/compute_tfidf_matrix.py"
 
 rule compute_tfidf_matrix:
     input:
-       os.path.join(data_dir, "data/{source}/articles.feather") 
+       os.path.join(output_dir, "data/{source}/articles-{processing}.csv") 
     output:
-        os.path.join(data_dir, "data/{source}/tfidf.feather"),
+        os.path.join(output_dir, "data/{source}/tfidf-{processing}.feather"),
     script: "scripts/compute_tfidf_matrix.py"
 
 rule compute_word_counts:
     input:
-        os.path.join(data_dir, "data/{source}/word-freq.feather"),
+        os.path.join(output_dir, "data/{source}/word-freq-{processing}.feather"),
     output:
-        os.path.join(data_dir, "data/{source}/word-counts.feather")
+        os.path.join(output_dir, "data/{source}/word-counts-{processing}.feather")
     script:
         "scripts/compute_word_counts.py"
 
 rule compute_word_freq_matrix:
     input:
-       os.path.join(data_dir, "data/{source}/articles.feather") 
+       os.path.join(output_dir, "data/{source}/articles-{processing}.csv") 
     output:
-        os.path.join(data_dir, "data/{source}/word-freq.feather"),
+        os.path.join(output_dir, "data/{source}/word-freq-{processing}.feather"),
     script: "scripts/compute_word_freq_matrix.py"
+
+rule combine_arxiv_lemmatized_articles:
+    input:
+        expand(os.path.join(input_dir, "arxiv/lemmatized/{arxiv_num}.feather"), arxiv_num=arxiv_num)
+    output:
+        os.path.join(output_dir, "data/arxiv/articles-lemmatized.csv")
+    script:
+        "scripts/combine_articles.py"
+
+rule combine_embeddings:
+    input:
+        expand(os.path.join(output_dir, "data/pubmed/biobert/{{agg_func}}/{pubmed_num}.feather"), pubmed_num=pubmed_annual),
+    output:
+        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather")
+    script:
+        "scripts/combine_embeddings.py"
+
+rule create_embeddings:
+    input:
+        os.path.join(input_dir, "pubmed/orig/{pubmed_num}.feather"),
+        os.path.join(model_dir, "biobert-v1.1/pytorch_model.bin")
+    output:
+        os.path.join(output_dir, "data/pubmed/biobert/mean/{pubmed_num}.feather"),
+        os.path.join(output_dir, "data/pubmed/biobert/median/{pubmed_num}.feather"),
+    script:
+        "scripts/create_biobert_embeddings.py"
+
+# combine articles and sub-sample, if enabled
+rule combine_arxiv_articles:
+    input:
+        expand(os.path.join(input_dir, "arxiv/orig/{arxiv_num}.feather"), arxiv_num=arxiv_num)
+    output:
+        os.path.join(output_dir, "data/arxiv/articles-baseline.csv")
+    script:
+        "scripts/combine_articles.py"
+
+rule combine_pubmed_lemmatized_articles:
+    input:
+        expand(os.path.join(input_dir, "pubmed/lemmatized/{pubmed_num}.feather"), pubmed_num=pubmed_annual)
+    output:
+        os.path.join(output_dir, "data/pubmed/articles-lemmatized.csv")
+    script:
+        "scripts/combine_articles.py"
+
+# combine articles and sub-sample, if enabled
+rule combine_pubmed_articles:
+    input:
+        expand(os.path.join(input_dir, "pubmed/orig/{pubmed_num}.feather"), pubmed_num=pubmed_annual)
+    output:
+        os.path.join(output_dir, "data/pubmed/articles-baseline.csv")
+    script:
+        "scripts/combine_articles.py"
+
+rule create_lemmatized_arxiv_corpus:
+    input:
+        os.path.join(input_dir, "arxiv/orig/{arxiv_num}.feather")
+    output:
+        os.path.join(input_dir, "arxiv/lemmatized/{arxiv_num}.feather")
+    script:
+        "scripts/lemmatize_text.py"
+
+rule create_lemmatized_pubmed_corpus:
+    input:
+        os.path.join(input_dir, "pubmed/orig/{pubmed_num}.feather")
+    output:
+        os.path.join(input_dir, "pubmed/lemmatized/{pubmed_num}.feather")
+    script:
+        "scripts/lemmatize_text.py"
+
+rule parse_pubmed_xml:
+    input: 
+        os.path.join(input_dir, "pubmed/raw/pubmed22n{pubmed_num}.xml.gz")
+    output:
+        os.path.join(input_dir, "pubmed/orig/{pubmed_num}.feather")
+    script:
+        "scripts/parse_pubmed_xml.py"
 
 rule parse_arxiv_json:
     input:
-        os.path.join(input_dir, "arxiv/arxiv-metadata-oai-snapshot.json")
+        os.path.join(input_dir, "arxiv/raw/arxiv-metadata-oai-snapshot.json")
     output:
-        os.path.join(data_dir, "data/arxiv/articles.feather")
+        os.path.join(input_dir, "arxiv/orig/{arxiv_num}.feather")
     script:
         "scripts/parse_arxiv_json.py"
-    
+
+rule download_biobert:
+    output:
+        os.path.join(model_dir, "biobert-v1.1/pytorch_model.bin")
+    shell:
+        """
+        cd `dirname {output}`
+        cd ..
+        git clone https://huggingface.co/dmis-lab/biobert-v1.1
+        """
+
+rule download_pubmed_baseline_data:
+    output:
+        os.path.join(input_dir, "pubmed/raw/pubmed22n{pubmed_num}.xml.gz")
+    shell:
+        """
+        cd `dirname {output}`
+        wget "https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed22n${pubmed_num}.xml.gz"
+        """
+
 rule download_arxiv_data: 
     output:
-        os.path.join(input_dir, "arxiv/arxiv-metadata-oai-snapshot.json")
+        os.path.join(input_dir, "arxiv/raw/arxiv-metadata-oai-snapshot.json")
     shell:
         """
         cd `dirname {output}`
@@ -159,39 +201,4 @@ rule download_arxiv_data:
 #             wget "https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed22n${i}.xml.gz"
 #         done
 #         """
-
-rule combine_pubmed_data:
-    input:
-        expand(os.path.join(input_dir, "pubmed/baseline/feather/pubmed22n{pubmed_baseline_num}.feather"), pubmed_baseline_num=pubmed_annual)
-    output:
-        os.path.join(data_dir, "data/pubmed/articles.feather")
-    script:
-        "scripts/combine_pubmed_articles.py"
-
-rule convert_pubmed_baseline_data:
-    input: 
-        os.path.join(input_dir, "pubmed/baseline/xml/pubmed22n{pubmed_baseline_num}.xml.gz")
-    output:
-        os.path.join(input_dir, "pubmed/baseline/feather/pubmed22n{pubmed_baseline_num}.feather")
-    script:
-        "scripts/parse_pubmed_xml.py"
-
-rule download_pubmed_baseline_data:
-    output:
-        os.path.join(input_dir, "pubmed/baseline/xml/pubmed22n{pubmed_baseline_num}.xml.gz")
-    shell:
-        """
-        cd `dirname {output}`
-        wget "https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed22n${i}.xml.gz"
-        """
-
-rule download_biobert:
-    output:
-        os.path.join(model_dir, "biobert-v1.1/pytorch_model.bin")
-    shell:
-        """
-        cd `dirname {output}`
-        cd ..
-        git clone https://huggingface.co/dmis-lab/biobert-v1.1
-        """
 

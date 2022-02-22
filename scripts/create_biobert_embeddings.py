@@ -3,7 +3,6 @@ Create BioBERT-based article embeddings
 """
 import os
 import torch
-import ujson
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -15,25 +14,29 @@ tokenizer = AutoTokenizer.from_pretrained(model_dir)
 # instantiate BioBERT model
 model = AutoModel.from_pretrained(model_dir).eval().cuda()
 
-# load arxiv articles
-ids = []
-corpus = []
+# load articles dataframe
+dat = pd.read_feather(snakemake.input[0])
 
-with open(snakemake.input[0]) as fp:
-    lines = fp.readlines()
+# exclude articles with missing abstracts or titles
+if snakemake.config['exclude_articles']['missing_abstract']:
+    dat = dat[~dat.abstract.isna()]
+if snakemake.config['exclude_articles']['missing_title']:
+    dat = dat[~dat.title.isna()]
 
-for line in lines:
-    article = ujson.loads(line)
+# fill missing title/abstract fields for any remaining articles with missing components
+dat.title.fillna("", inplace=True)
+dat.abstract.fillna("", inplace=True)
 
-    ids.append(article['id'])
+ids = dat.id.values
 
-    doc = article['title'] + " " + article['abstract']
+for ind, article in dat.iterrows():
+    doc = article.title + " " + article.abstract
     doc = doc.replace('\n', ' ')
-
     corpus.append(doc)
 
 # iterate over articles, and create embeddings
-embeddings = []
+mean_embeddings = []
+median_embeddings = []
 
 with torch.no_grad():
     for doc in tqdm(corpus):
@@ -46,11 +49,16 @@ with torch.no_grad():
         token_embeddings, abs_embedding = model(token_tensor[None,:].cuda()).to_tuple()
         
         # compute article embedding as the mean of its word embeddings
-        embedding = token_embeddings.mean(1)[0].detach().cpu().numpy()
-        embeddings.append(embedding)
+        mean_embeddings.append(token_embeddings.mean(1)[0].detach().cpu().numpy())
+        median_embeddings.append(token_embeddings.median(1)[0].detach().cpu().numpy())
 
-dat = pd.DataFrame(np.vstack(embeddings), 
-                   index=pd.Series(ids, name='article_id'))
-dat.columns = [f"dim_{i}" for i in dat.columns]
+# store embeddings
+mean_df = pd.DataFrame(np.vstack(mean_embeddings), index=pd.Series(ids, name='article_id'))
+mean_df.columns = [f"dim_{i}" for i in mean_df.columns]
 
-dat.reset_index().to_feather(snakemake.output[0])
+mean_df.reset_index().to_feather(snakemake.output[0])
+
+median_df = pd.DataFrame(np.vstack(median_embeddings), index=pd.Series(ids, name='article_id'))
+median_df.columns = [f"dim_{i}" for i in median_df.columns]
+
+median_df.reset_index().to_feather(snakemake.output[1])

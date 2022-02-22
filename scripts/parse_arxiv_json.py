@@ -1,25 +1,32 @@
 """
-Parses arxiv metadata JSON and extracts article ids and combined title + abstracts
+Parses arxiv metadata JSON, extracts article ids, titles, and abstracts, and stores
+batches of articles in separate chunked files.
 """
-import random
+import os
 import ujson
 import pandas as pd
+
+with open(snakemake.input[0]) as fp:
+    lines = fp.readlines()
+
+# total number of articles
+num_articles = len(lines)
+
+# number of articles to include, per output chunk
+articles_per_batch = int(num_articles / snakemake.config['arxiv']['num_chunks'])
+
+# determine indices of articles to include in chunk
+start_ind = (int(snakemake.wildcards['arxiv_num']) - 1) * articles_per_batch
+end_ind = start_ind + articles_per_batch
+
+# limit to desired range
+lines = lines[start_ind:end_ind]
 
 # load arxiv articles
 ids = []
 dois = []
 titles = []
 abstracts = []
-
-with open(snakemake.input[0]) as fp:
-    lines = fp.readlines()
-
-# if dev-mode is enabled, subsample articles
-if snakemake.config['dev_mode']['enabled']:
-    random.seed(snakemake.config['random_seed'])
-
-    random.shuffle(lines)
-    lines = lines[:snakemake.config['dev_mode']['num_articles']]
 
 for line in lines:
     article = ujson.loads(line)
@@ -29,6 +36,39 @@ for line in lines:
     titles.append(article['title'])
     abstracts.append(article['abstract'])
 
-dat = pd.DataFrame({"id":ids, "doi": dois, "title": titles, "abstract": abstracts })
+# save batch of articles to dataframe
+dat = pd.DataFrame({
+    "id": ids,
+    "doi": dois,
+    "title": titles,
+    "abstract": abstracts
+})
 
 dat.to_feather(snakemake.output[0])
+
+#  batch_counter = 1
+#
+#  start_ind = 0
+#  end_ind = articles_per_batch
+#
+#  out_dir = os.path.dirname(snakemake.output[0])
+#
+#  while batch_counter <= snakemake.config['arxiv']['num_chunks']:
+#      # save batch of articles to dataframe
+#      dat = pd.DataFrame({
+#          "id": ids[start_ind:end_ind],
+#          "doi": dois[start_ind:end_ind],
+#          "title": titles[start_ind:end_ind],
+#          "abstract": abstracts[start_ind:end_ind]
+#      })
+#
+#      dat.to_feather(os.path.join(out_dir, f"{batch_counter:04}.feather"))
+#
+#      # update counters/indices
+#      start_ind = start_ind + articles_per_batch
+#      end_ind = end_ind + articles_per_batch
+#
+#      end_ind = min(end_ind, num_articles + 1)
+#
+#      batch_counter = batch_counter + 1
+#
