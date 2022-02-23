@@ -9,7 +9,9 @@ configfile: "config/config.yml"
 arxiv_num = [f"{n:04}" for n in range(1, config['arxiv']['num_chunks'] + 1)]
 
 # pubmed annual file numbers (2022)
-pubmed_annual = [f"{n:04}" for n in range(1, 1115)]
+# pubmed_annual = [f"{n:04}" for n in range(1, 1115)]
+# TESTING
+pubmed_annual = [f"{n:04}" for n in range(1, 5)]
 
 # pubmed daily update file numbers (not yet incorporated..)
 # daily_start = config['pubmed']['updates_start']
@@ -34,7 +36,8 @@ agg_funcs = ['mean', 'median']
 rule all:
     input:
         expand(os.path.join(output_dir, "fig/{source}/article-tfidf-{processing}-tsne.png"), source=data_sources, processing=processing_versions),
-        expand(os.path.join(output_dir, "data/{source}/tfidf-{processing}-umap.feather"), source=data_sources, processing=processing_versions)
+        expand(os.path.join(output_dir, "data/{source}/tfidf-{processing}-umap.feather"), source=data_sources, processing=processing_versions),
+        expand(os.path.join(output_dir, "fig/pubmed/article-biobert-{agg_func}-tsne.png"), agg_func=agg_funcs)
 
 rule project_article_tfdf_umap:
     input:
@@ -44,6 +47,17 @@ rule project_article_tfdf_umap:
         os.path.join(output_dir, "data/{source}/tfidf-{processing}-umap.feather"),
     script:
         "scripts/transform_umap.py"
+
+rule plot_biobert_tsne:
+    input:
+        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather"),
+        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}-clusters.feather")
+    output:
+        os.path.join(output_dir, "fig/pubmed/article-biobert-{agg_func}-tsne.png"),
+    params:
+        title="BioBERT"
+    script:
+        "scripts/plot_article_tsne.py"
 
 rule plot_article_tfidf_tsne:
     input:
@@ -61,7 +75,14 @@ rule compute_tfidf_clusters:
         os.path.join(output_dir, "data/{source}/tfidf-{processing}.feather"),
     output:
         os.path.join(output_dir, "data/{source}/tfidf-{processing}-clusters.feather"),
-    script: "scripts/compute_tfidf_clusters.py"
+    script: "scripts/compute_article_clusters.py"
+
+rule compute_biobert_clusters:
+    input:
+        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather")
+    output:
+        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}-clusters.feather"),
+    script: "scripts/compute_article_clusters.py"
 
 rule compute_tfidf_matrix:
     input:

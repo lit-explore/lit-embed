@@ -35,8 +35,11 @@ tsne_dat.index = dat.index
 # add cluster information
 tsne_dat = pd.concat([tsne_dat, clusters], axis=1)
 
-if snakemake.wildcards['source'] == 'arxiv':
-    source = 'arXiv'
+if "source" in snakemake.wildcards:
+    if snakemake.wildcards['source'] == 'arxiv':
+        source = 'arXiv'
+    else:
+        source = 'Pubmed'
 else:
     source = 'Pubmed'
 

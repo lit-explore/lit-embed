@@ -1,5 +1,5 @@
 """
-Create BioBERT-based article embeddings
+Create BioBERT, etc. article embeddings
 """
 import os
 import torch
@@ -11,7 +11,7 @@ from transformers import AutoTokenizer, AutoModel
 model_dir = os.path.dirname(snakemake.input[1])
 tokenizer = AutoTokenizer.from_pretrained(model_dir)
 
-# instantiate BioBERT model
+# instantiate language model
 model = AutoModel.from_pretrained(model_dir).eval().cuda()
 
 # load articles dataframe
@@ -28,6 +28,8 @@ dat.title.fillna("", inplace=True)
 dat.abstract.fillna("", inplace=True)
 
 ids = dat.id.values
+
+corpus = []
 
 for ind, article in dat.iterrows():
     doc = article.title + " " + article.abstract
