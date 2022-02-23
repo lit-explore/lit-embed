@@ -9,9 +9,7 @@ configfile: "config/config.yml"
 arxiv_num = [f"{n:04}" for n in range(1, config['arxiv']['num_chunks'] + 1)]
 
 # pubmed annual file numbers (2022)
-# pubmed_annual = [f"{n:04}" for n in range(1, 1115)]
-# TESTING
-pubmed_annual = [f"{n:04}" for n in range(1, 5)]
+pubmed_annual = [f"{n:04}" for n in range(1, 1115)]
 
 # pubmed daily update file numbers (not yet incorporated..)
 # daily_start = config['pubmed']['updates_start']

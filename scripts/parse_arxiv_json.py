@@ -32,10 +32,17 @@ for line in lines:
     article = ujson.loads(line)
     title = article['title'].replace("\n", " ").strip()
 
+    if snakemake.config['exclude_articles']['missing_title'] and title == "":
+        continue
+
+    if snakemake.config['exclude_articles']['missing_abstract'] and article['abstract'] == "":
+        continue
+
+    abstracts.append(article['abstract'])
+
     ids.append(article['id'])
     dois.append(article['doi'])
     titles.append(title)
-    abstracts.append(article['abstract'])
 
 # save batch of articles to dataframe
 dat = pd.DataFrame({

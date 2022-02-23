@@ -21,11 +21,18 @@ lemma_abstracts = []
 
 # iterate over article texts, and apply lemmatizer
 for ind, article in corpus.iterrows():
-    ids.append(article.id)
-    dois.append(article.doi)
-
     if ind % 100 == 0:
         print(f"Processing article {ind + 1}...")
+
+    # moved upstream..
+    #  if snakemake.config['exclude_articles']['missing_title'] and article.title == "":
+    #      continue
+    #
+    #  if snakemake.config['exclude_articles']['missing_abstract'] and article.abstract == "":
+    #      continue
+
+    ids.append(article.id)
+    dois.append(article.doi)
 
     # process title and abstract together to reduce overhead;
     # newlines have been previously removed from titles to ensure that each
@@ -35,6 +42,13 @@ for ind, article in corpus.iterrows():
     # stanza work-around; fails if text is *exactly* the length of the batch size (3000)
     if len(text) == 3000:
         text = text + "."
+
+    # if both title & abstract are empty, skip lemmatization
+    if text == "\n\n":
+        lemma_titles.append("")
+        lemma_abstracts.append("")
+
+        continue
 
     # lemmatize title
     doc = nlp(text)
@@ -54,7 +68,9 @@ for ind, article in corpus.iterrows():
     if len(text) == 3001:
         abstract_words = abstract_words[:-1]
 
-    lemma_abstracts.append(" ".join(abstract_words).replace(" .", "."))
+    abstract = " ".join(abstract_words).replace(" .", ".")
+
+    lemma_abstracts.append(abstract)
 
 df = pd.DataFrame({
     "id": ids, 

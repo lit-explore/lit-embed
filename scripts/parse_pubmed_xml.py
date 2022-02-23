@@ -17,19 +17,34 @@ abstracts = []
 
 # iterate over articles in xml file
 for article in root.findall(".//PubmedArticle"):
-    # extract title, doi, and abstract, if present
-    title = article.find(".//ArticleTitle").text.replace('\n', ' ').strip()
+    # extract title
+    title_elem = article.find(".//ArticleTitle")
+
+    if title_elem is None or title_elem.text is None:
+        title = ""
+    else:
+        title = title_elem.text.replace('\n', ' ').strip()
+
+    if snakemake.config['exclude_articles']['missing_title'] and title == "":
+        continue
+
+    # extract abstract
+    abstract_elem = article.find(".//AbstractText")
+
+    if abstract_elem is None or abstract_elem.text is None:
+        abstract = ""
+    else:
+        abstract = abstract_elem.text.replace('\n', ' ').strip()
+
+    if snakemake.config['exclude_articles']['missing_abstract'] and abstract == "":
+        continue
+
+    # extract id/doi
     id = article.find(".//ArticleId[@IdType='pubmed']").text
 
     doi_elem = article.find(".//ArticleId[@IdType='doi']")
     doi = "" if doi_elem is None else doi_elem.text;
 
-    abstract_elem = article.find(".//AbstractText")
-
-    if abstract_elem is None:
-        abstract = ""
-    else:
-        abstract = abstract_elem.text.replace('\n', ' ').strip()
 
     ids.append(id)
     dois.append(doi)

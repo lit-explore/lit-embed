@@ -25,9 +25,7 @@ pubmed:
   updates_start: 1115
   updates_end: 1191
 
-# factors to use to decide whether to exclude an article from analysis;
-# at present, this only affects downstream operations, starting from word frequency and
-# tf-idf matrix generation
+# factors to use to decide whether to exclude an article from analysis
 exclude_articles:
   missing_abstract: true
   missing_title: true
