@@ -5,6 +5,7 @@ batches of articles in separate chunked files.
 import os
 import ujson
 import pandas as pd
+from datetime import datetime
 
 with open(snakemake.input[0]) as fp:
     lines = fp.readlines()
@@ -27,6 +28,7 @@ ids = []
 dois = []
 titles = []
 abstracts = []
+dates = []
 
 for line in lines:
     article = ujson.loads(line)
@@ -40,16 +42,21 @@ for line in lines:
 
     abstracts.append(article['abstract'])
 
+    date_created = article['versions'][-1]['created'][5:]
+    date_str = datetime.strptime(date_created, "%d %b %Y %H:%M:%S %Z").isoformat()
+
     ids.append(article['id'])
     dois.append(article['doi'])
     titles.append(title)
+    dates.append(date_str)
 
 # save batch of articles to dataframe
 dat = pd.DataFrame({
     "id": ids,
     "doi": dois,
     "title": titles,
-    "abstract": abstracts
+    "abstract": abstracts,
+    "date": dates
 })
 
 dat.to_feather(snakemake.output[0])

@@ -4,6 +4,7 @@ Parses Pubmed XML data and extract article id, title, and abstract information
 import gzip
 import xml.etree.ElementTree as ET
 import pandas as pd
+from datetime import datetime
 
 with gzip.open(snakemake.input[0], "r") as fp:
     tree = ET.parse(fp)
@@ -12,6 +13,7 @@ root = tree.getroot()
 
 ids = []
 dois = []
+dates = []
 titles = []
 abstracts = []
 
@@ -45,12 +47,26 @@ for article in root.findall(".//PubmedArticle"):
     doi_elem = article.find(".//ArticleId[@IdType='doi']")
     doi = "" if doi_elem is None else doi_elem.text;
 
+    # extract publication date
+    #  <PubDate>
+    #    <Year>2021</Year>
+    #    <Month>Dec</Month>
+    #    <Day>08</Day>
+    #  </PubDate>
+    date_elem = article.find(".//PubDate")
+
+    year = date_elem[0].text
+    month = date_elem[1].text
+    day = date_elem[2].text
+
+    date_str = datetime.strptime(f"{year} {month} {day}", "%Y %b %d").isoformat()
 
     ids.append(id)
     dois.append(doi)
     titles.append(title)
     abstracts.append(abstract)
+    dates.append(date_str)
 
-dat = pd.DataFrame({"id": ids, "doi": dois, "title": titles, "abstract": abstracts})
+dat = pd.DataFrame({"id": ids, "doi": dois, "title": titles, "abstract": abstracts, "date": dates})
 
 dat.reset_index(drop=True).to_feather(snakemake.output[0])
