@@ -18,12 +18,12 @@ dat = pd.read_feather(snakemake.input[0]).set_index('article_id')
 clusters = pd.read_feather(snakemake.input[1]).set_index('article_id')
 
 # subsample to speed things up
-num_articles = min(snakemake.config['tsne']['subsample'], dat.shape[0])
+if snakemake.config['tsne']['subsample'] < dat.shape[0]:
+    ind = random.sample(range(dat.shape[0]), snakemake.config['tsne']['subsample'])
+    dat = dat.iloc[ind]
+    clusters = clusters.iloc[ind]
 
-ind = random.sample(range(dat.shape[0]), num_articles)
-
-dat = dat.iloc[ind]
-clusters = clusters.iloc[ind]
+num_articles = dat.shape[0]
 
 tsne = TSNE(n_components=2, perplexity=30.0, init='random', metric='cosine', 
             n_jobs=-1, learning_rate='auto', square_distances=True,

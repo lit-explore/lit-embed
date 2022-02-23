@@ -30,10 +30,11 @@ abstracts = []
 
 for line in lines:
     article = ujson.loads(line)
+    title = article['title'].replace("\n", " ").strip()
 
     ids.append(article['id'])
     dois.append(article['doi'])
-    titles.append(article['title'])
+    titles.append(title)
     abstracts.append(article['abstract'])
 
 # save batch of articles to dataframe

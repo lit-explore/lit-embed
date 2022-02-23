@@ -4,7 +4,10 @@ Computes Word Frequency Matrix
 import ujson
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
-from util.nlp import STOP_WORDS
+from util.nlp import STOP_WORDS, STOP_WORDS_LEMMA
+
+# determine version of stop words to use
+stop_words = STOP_WORDS if snakemake.wildcards['processing'] == 'baseline' else STOP_WORDS_LEMMA
 
 # load articles
 dat = pd.read_csv(snakemake.input[0])
@@ -36,7 +39,7 @@ token_pattern = r"(?u)\b\w{" + str(min_length) + r",}\b"
 vectorizer = CountVectorizer(max_df=snakemake.config['word_freq']['max_df'],
                              min_df=snakemake.config['word_freq']['min_df'],
                              max_features=snakemake.config['word_freq']['max_features'],
-                             stop_words=STOP_WORDS,
+                             stop_words=stop_words,
                              token_pattern=token_pattern)
 
 mat = vectorizer.fit_transform(corpus)

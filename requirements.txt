@@ -17,5 +17,6 @@ ipykernel
 ipywidgets
 nb_conda_kernels
 stanza
+umap-learn
 huggingface::transformers
 pytorch::pytorch

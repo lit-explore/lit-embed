@@ -18,14 +18,18 @@ abstracts = []
 # iterate over articles in xml file
 for article in root.findall(".//PubmedArticle"):
     # extract title, doi, and abstract, if present
-    title = article.find(".//ArticleTitle").text
+    title = article.find(".//ArticleTitle").text.replace('\n', ' ').strip()
     id = article.find(".//ArticleId[@IdType='pubmed']").text
 
     doi_elem = article.find(".//ArticleId[@IdType='doi']")
     doi = "" if doi_elem is None else doi_elem.text;
 
     abstract_elem = article.find(".//AbstractText")
-    abstract = "" if abstract_elem is None else abstract_elem.text
+
+    if abstract_elem is None:
+        abstract = ""
+    else:
+        abstract = abstract_elem.text.replace('\n', ' ').strip()
 
     ids.append(id)
     dois.append(doi)

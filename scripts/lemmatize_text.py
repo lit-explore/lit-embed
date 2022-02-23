@@ -24,42 +24,37 @@ for ind, article in corpus.iterrows():
     ids.append(article.id)
     dois.append(article.doi)
 
-    # lemmatize title
-    text = article.title.lower()
-    doc = nlp(text)
-
-    lemma_words = []
-
-    # [ ] add "verbose" option to config..
     if ind % 100 == 0:
         print(f"Processing article {ind + 1}...")
 
-    for sentence in doc.sentences:
-        for word in sentence.words:
-            lemma_words.append(word.lemma)
-
-    lemma_titles.append(" ".join(lemma_words).replace(" .", "."))
-
-    # lemmatize abstract
-    text = article.abstract.lower()
+    # process title and abstract together to reduce overhead;
+    # newlines have been previously removed from titles to ensure that each
+    # title contains only a single sentence
+    text = article.title.lower() + "\n\n" + article.abstract.lower()
 
     # stanza work-around; fails if text is *exactly* the length of the batch size (3000)
     if len(text) == 3000:
         text = text + "."
 
+    # lemmatize title
     doc = nlp(text)
 
-    lemma_words = []
+    # extract title (first sentence in output)
+    title_words = [word.lemma for word in doc.sentences[0].words]
+    lemma_titles.append(" ".join(title_words))
 
-    for sentence in doc.sentences:
+    # extract abstract
+    abstract_words = []
+
+    for sentence in doc.sentences[1:]:
         for word in sentence.words:
-            lemma_words.append(word.lemma)
+            abstract_words.append(word.lemma)
 
     # remove extra period added for work-around, if present
     if len(text) == 3001:
-        lemma_words = lemma_words[:-1]
+        abstract_words = abstract_words[:-1]
 
-    lemma_abstracts.append(" ".join(lemma_words).replace(" .", "."))
+    lemma_abstracts.append(" ".join(abstract_words).replace(" .", "."))
 
 df = pd.DataFrame({
     "id": ids, 

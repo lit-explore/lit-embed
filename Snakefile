@@ -33,7 +33,17 @@ agg_funcs = ['mean', 'median']
 
 rule all:
     input:
-        expand(os.path.join(output_dir, "fig/{source}/article-tfidf-{processing}-tsne.png"), source=data_sources, processing=processing_versions)
+        expand(os.path.join(output_dir, "fig/{source}/article-tfidf-{processing}-tsne.png"), source=data_sources, processing=processing_versions),
+        expand(os.path.join(output_dir, "data/{source}/tfidf-{processing}-umap.feather"), source=data_sources, processing=processing_versions)
+
+rule project_article_tfdf_umap:
+    input:
+        os.path.join(output_dir, "data/{source}/tfidf-{processing}.feather"),
+        os.path.join(output_dir, "data/{source}/tfidf-{processing}-clusters.feather"),
+    output:
+        os.path.join(output_dir, "data/{source}/tfidf-{processing}-umap.feather"),
+    script:
+        "scripts/transform_umap.py"
 
 rule plot_article_tfidf_tsne:
     input:
@@ -83,24 +93,6 @@ rule combine_arxiv_lemmatized_articles:
     script:
         "scripts/combine_articles.py"
 
-rule combine_embeddings:
-    input:
-        expand(os.path.join(output_dir, "data/pubmed/biobert/{{agg_func}}/{pubmed_num}.feather"), pubmed_num=pubmed_annual),
-    output:
-        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather")
-    script:
-        "scripts/combine_embeddings.py"
-
-rule create_embeddings:
-    input:
-        os.path.join(input_dir, "pubmed/orig/{pubmed_num}.feather"),
-        os.path.join(model_dir, "biobert-v1.1/pytorch_model.bin")
-    output:
-        os.path.join(output_dir, "data/pubmed/biobert/mean/{pubmed_num}.feather"),
-        os.path.join(output_dir, "data/pubmed/biobert/median/{pubmed_num}.feather"),
-    script:
-        "scripts/create_biobert_embeddings.py"
-
 # combine articles and sub-sample, if enabled
 rule combine_arxiv_articles:
     input:
@@ -126,6 +118,24 @@ rule combine_pubmed_articles:
         os.path.join(output_dir, "data/pubmed/articles-baseline.csv")
     script:
         "scripts/combine_articles.py"
+
+rule combine_embeddings:
+    input:
+        expand(os.path.join(output_dir, "data/pubmed/biobert/{{agg_func}}/{pubmed_num}.feather"), pubmed_num=pubmed_annual),
+    output:
+        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather")
+    script:
+        "scripts/combine_embeddings.py"
+
+rule create_embeddings:
+    input:
+        os.path.join(input_dir, "pubmed/orig/{pubmed_num}.feather"),
+        os.path.join(model_dir, "biobert-v1.1/pytorch_model.bin")
+    output:
+        os.path.join(output_dir, "data/pubmed/biobert/mean/{pubmed_num}.feather"),
+        os.path.join(output_dir, "data/pubmed/biobert/median/{pubmed_num}.feather"),
+    script:
+        "scripts/create_biobert_embeddings.py"
 
 rule create_lemmatized_arxiv_corpus:
     input:

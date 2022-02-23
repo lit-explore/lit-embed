@@ -11,12 +11,12 @@ random_seed: 321
 # development mode; if enabled, only a subset of articles are analyzed
 dev_mode:
   enabled: false
-  num_articles: 1000
+  num_articles: 100000
 
 # arxiv-related settings
 arxiv:
   # number of chunks to split dataset into for processing
-  num_chunks: 1000
+  num_chunks: 100
 
 # pubmed-related settings
 pubmed:
