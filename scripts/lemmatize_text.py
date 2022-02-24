@@ -40,8 +40,11 @@ for ind, article in corpus.iterrows():
     text = article.title.lower() + "\n\n" + article.abstract.lower()
 
     # stanza work-around; fails if text is *exactly* the length of the batch size (3000)
+    padding_counter = 0
+
     if len(text) == 3000:
         text = text + "."
+        padding_counter = 1
 
     # if both title & abstract are empty, skip lemmatization
     if text == "\n\n":
@@ -51,7 +54,13 @@ for ind, article in corpus.iterrows():
         continue
 
     # lemmatize title
-    doc = nlp(text)
+    try:
+        doc = nlp(text)
+    except:
+        # work-around: stanza still fails for some texts, even when the length of the
+        # text is not equal to the batch size.
+        doc = nlp(text + ".")
+        padding_counter += 1
 
     # extract title (first sentence in output)
     title_words = [word.lemma for word in doc.sentences[0].words]
@@ -65,8 +74,8 @@ for ind, article in corpus.iterrows():
             abstract_words.append(word.lemma)
 
     # remove extra period added for work-around, if present
-    if len(text) == 3001:
-        abstract_words = abstract_words[:-1]
+    if padding_counter > 0:
+        abstract_words = abstract_words[:-padding_counter]
 
     abstract = " ".join(abstract_words).replace(" .", ".")
 
