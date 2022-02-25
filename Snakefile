@@ -30,12 +30,32 @@ else:
 data_sources = ['pubmed', 'arxiv']
 processing_versions = ['baseline', 'lemmatized']
 agg_funcs = ['mean', 'median']
+projection_types = ['tsne', 'umap']
 
 rule all:
     input:
-        expand(os.path.join(output_dir, "fig/{source}/article-tfidf-{processing}-tsne.png"), source=data_sources, processing=processing_versions),
-        expand(os.path.join(output_dir, "data/{source}/tfidf-{processing}-umap.feather"), source=data_sources, processing=processing_versions),
-        expand(os.path.join(output_dir, "fig/pubmed/article-biobert-{agg_func}-tsne.png"), agg_func=agg_funcs)
+        expand(os.path.join(output_dir, "fig/{source}/tfidf-{processing}-{projection}.png"), source=data_sources, processing=processing_versions, projection=projection_types),
+        expand(os.path.join(output_dir, "fig/pubmed/biobert-{agg_func}-{projection}.png"), agg_func=agg_funcs, projection=projection_types)
+
+rule plot_tfidf_scatterplot:
+    input:
+        os.path.join(output_dir, "data/{source}/tfidf-{processing}-{projection}.feather"),
+    output:
+        os.path.join(output_dir, "fig/{source}/tfidf-{processing}-{projection}.png"),
+    params:
+        name="TF-IDF"
+    script:
+        "scripts/plot_scatter.py"
+
+rule plot_biobert_scatterplot:
+    input:
+        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}-{projection}.feather")
+    output:
+        os.path.join(output_dir, "fig/pubmed/biobert-{agg_func}-{projection}.png"),
+    params:
+        name="BioBERT"
+    script:
+        "scripts/plot_scatter.py"
 
 rule project_article_tfdf_umap:
     input:
@@ -46,27 +66,32 @@ rule project_article_tfdf_umap:
     script:
         "scripts/transform_umap.py"
 
-rule plot_biobert_tsne:
-    input:
-        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather"),
-        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}-clusters.feather")
-    output:
-        os.path.join(output_dir, "fig/pubmed/article-biobert-{agg_func}-tsne.png"),
-    params:
-        title="BioBERT"
-    script:
-        "scripts/plot_article_tsne.py"
-
-rule plot_article_tfidf_tsne:
+rule project_article_tfdf_tsne:
     input:
         os.path.join(output_dir, "data/{source}/tfidf-{processing}.feather"),
         os.path.join(output_dir, "data/{source}/tfidf-{processing}-clusters.feather"),
     output:
-        os.path.join(output_dir, "fig/{source}/article-tfidf-{processing}-tsne.png"),
-    params:
-        title="TF-IDF"
+        os.path.join(output_dir, "data/{source}/tfidf-{processing}-tsne.feather"),
     script:
-        "scripts/plot_article_tsne.py"
+        "scripts/transform_tsne.py"
+
+rule project_biobert_umap:
+    input:
+        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather"),
+        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}-clusters.feather")
+    output:
+        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}-umap.feather")
+    script:
+        "scripts/transform_umap.py"
+
+rule project_biobert_tsne:
+    input:
+        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather"),
+        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}-clusters.feather")
+    output:
+        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}-tsne.feather")
+    script:
+        "scripts/transform_tsne.py"
 
 rule compute_tfidf_clusters:
     input:

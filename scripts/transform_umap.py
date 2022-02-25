@@ -28,11 +28,11 @@ if num_zero_var > 0:
 
 # generate projection
 reducer = umap.UMAP(
-        n_neighbors=snakemake.config['umap']['n_neighbors'],
-        min_dist=snakemake.config['umap']['min_dist'],
-        metric=snakemake.config['umap']['metric'],
-        densmap=snakemake.config['umap']['densmap'],
-        random_state=snakemake.config['random_seed']
+    n_neighbors=snakemake.config['umap']['n_neighbors'],
+    min_dist=snakemake.config['umap']['min_dist'],
+    metric=snakemake.config['umap']['metric'],
+    densmap=snakemake.config['umap']['densmap'],
+    random_state=snakemake.config['random_seed']
 )
 
 embedding = reducer.fit_transform(dat)
