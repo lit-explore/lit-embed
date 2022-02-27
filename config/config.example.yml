@@ -44,9 +44,43 @@ tokenization:
 
 # clustering parameters (mini-batch kmeans)
 clustering:
-  num_clusters: 10
-  batch_size: 8192
+  articles:
+    num_clusters: 20
+    batch_size: 8192
+  topics:
+    num_clusters: 15
+    batch_size: 8192
 
-# t-SNE article visualization
+# t-SNE settings
 tsne:
-  subsample: 5000
+  articles:
+    num: 10000
+    metric: 'cosine'
+    perplexity: 30
+  topics:
+    num: 10000
+    metric: 'cosine'
+    perplexity: 30
+
+# UMAP settings
+umap:
+  articles:
+    num: 500000
+    densmap: true
+    n_neighbors: 25
+    min_dist: 0.1
+    metric: 'cosine'
+  topics:
+    num: 10000
+    densmap: true
+    n_neighbors: 25
+    min_dist: 0.1
+    metric: 'cosine'
+
+# plot settings
+seaborn:
+  scatterplot:
+    max_points: 10000
+    width: 16
+    height: 12
+    size: 14

@@ -1,5 +1,5 @@
 """
-Computes article clusters
+Computes topic/article clusters
 """
 import pandas as pd
 from sklearn.cluster import MiniBatchKMeans
@@ -7,19 +7,25 @@ from sklearn.cluster import MiniBatchKMeans
 # load tf-idf, etc. matrix
 dat = pd.read_feather(snakemake.input[0]).set_index('article_id')
 
-# cluster articles
-num_clusters = snakemake.config['clustering']['num_clusters']
+# determine number of clusters
+target = snakemake.wildcards['target']
+
+num_clusters = snakemake.config['clustering'][target]['num_clusters']
+batch_size = snakemake.config['clustering'][target]['batch_size']
 
 print("Clustering data..")
 
-kmeans = MiniBatchKMeans(num_clusters,
-                         batch_size=snakemake.config['clustering']['batch_size'])
-clusters = kmeans.fit(dat).labels_
+kmeans = MiniBatchKMeans(num_clusters, batch_size=batch_size)
+
+if target == 'articles':
+    clusters = kmeans.fit(dat).labels_
+else:
+    clusters = kmeans.fit(dat.T).labels_
 
 # for word frequency / tfidf matrices where columns correspond to specific words,
 # generate human-readable cluster labels corresponding to the top 3 tokens associated
 # with the cluster
-if "processing" in snakemake.wildcards:
+if target == "articles" and "processing" in snakemake.wildcards:
     label_dict = []
 
     print("Generating cluster labels..")
@@ -36,12 +42,14 @@ if "processing" in snakemake.wildcards:
 
     mapping = {i:x for i, x in enumerate(label_dict)}
     cluster_labels = [mapping[x] for x in clusters]
+
 else:
-    # for biobert, etc. embeddings, just use generic "cluster_xx" labels for now
+    # otherwise, just assign generic cluster names for now
     cluster_labels = [f"cluster_{x}" for x in clusters]
 
-print("Saving clustering results..")
-
-res = pd.DataFrame({"article_id": dat.index, "cluster": cluster_labels})
+if target == 'articles':
+    res = pd.DataFrame({"article_id": dat.index, "cluster": cluster_labels})
+else:
+    res = pd.DataFrame({"topic": dat.columns, "cluster": cluster_labels})
 
 res.to_feather(snakemake.output[0])

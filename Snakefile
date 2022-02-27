@@ -31,17 +31,19 @@ data_sources = ['pubmed', 'arxiv']
 processing_versions = ['baseline', 'lemmatized']
 agg_funcs = ['mean', 'median']
 projection_types = ['tsne', 'umap']
+targets = ['articles', 'topics']
 
 rule all:
     input:
-        expand(os.path.join(output_dir, "fig/{source}/tfidf-{processing}-{projection}.png"), source=data_sources, processing=processing_versions, projection=projection_types),
-        expand(os.path.join(output_dir, "fig/pubmed/biobert-{agg_func}-{projection}.png"), agg_func=agg_funcs, projection=projection_types)
+        expand(os.path.join(output_dir, "fig/{source}/{target}/{projection}/tfidf-{processing}.png"), source=data_sources, processing=processing_versions, target=targets, projection=projection_types),
+        expand(os.path.join(output_dir, "fig/pubmed/{target}/{projection}/biobert-{agg_func}.png"), agg_func=agg_funcs, target=targets, projection=projection_types)
 
 rule plot_tfidf_scatterplot:
     input:
-        os.path.join(output_dir, "data/{source}/tfidf-{processing}-{projection}.feather"),
+        os.path.join(output_dir, "data/{source}/{target}/{projection}/tfidf-{processing}.feather"),
+        os.path.join(output_dir, "data/{source}/{target}/tfidf-{processing}-clusters.feather"),
     output:
-        os.path.join(output_dir, "fig/{source}/tfidf-{processing}-{projection}.png"),
+        os.path.join(output_dir, "fig/{source}/{target}/{projection}/tfidf-{processing}.png"),
     params:
         name="TF-IDF"
     script:
@@ -49,63 +51,45 @@ rule plot_tfidf_scatterplot:
 
 rule plot_biobert_scatterplot:
     input:
-        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}-{projection}.feather")
+        os.path.join(output_dir, "data/pubmed/{target}/{projection}/biobert-{agg_func}.feather"),
+        os.path.join(output_dir, "data/pubmed/{target}/biobert-{agg_func}-clusters.feather"),
     output:
-        os.path.join(output_dir, "fig/pubmed/biobert-{agg_func}-{projection}.png"),
+        os.path.join(output_dir, "fig/pubmed/{target}/{projection}/biobert-{agg_func}.png"),
     params:
         name="BioBERT"
     script:
         "scripts/plot_scatter.py"
 
-rule project_article_tfdf_umap:
+rule tfidf_dimension_reduction:
     input:
         os.path.join(output_dir, "data/{source}/tfidf-{processing}.feather"),
-        os.path.join(output_dir, "data/{source}/tfidf-{processing}-clusters.feather"),
     output:
-        os.path.join(output_dir, "data/{source}/tfidf-{processing}-umap.feather"),
+        os.path.join(output_dir, "data/{source}/{target}/{projection}/tfidf-{processing}.feather"),
     script:
-        "scripts/transform_umap.py"
+        "scripts/reduce_dimension.py"
 
-rule project_article_tfdf_tsne:
+rule biobert_dimension_reduction:
     input:
-        os.path.join(output_dir, "data/{source}/tfidf-{processing}.feather"),
-        os.path.join(output_dir, "data/{source}/tfidf-{processing}-clusters.feather"),
+        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather")
     output:
-        os.path.join(output_dir, "data/{source}/tfidf-{processing}-tsne.feather"),
+        os.path.join(output_dir, "data/pubmed/{target}/{projection}/biobert-{agg_func}.feather"),
     script:
-        "scripts/transform_tsne.py"
-
-rule project_biobert_umap:
-    input:
-        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather"),
-        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}-clusters.feather")
-    output:
-        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}-umap.feather")
-    script:
-        "scripts/transform_umap.py"
-
-rule project_biobert_tsne:
-    input:
-        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather"),
-        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}-clusters.feather")
-    output:
-        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}-tsne.feather")
-    script:
-        "scripts/transform_tsne.py"
+        "scripts/reduce_dimension.py"
 
 rule compute_tfidf_clusters:
     input:
         os.path.join(output_dir, "data/{source}/tfidf-{processing}.feather"),
     output:
-        os.path.join(output_dir, "data/{source}/tfidf-{processing}-clusters.feather"),
-    script: "scripts/compute_article_clusters.py"
+        os.path.join(output_dir, "data/{source}/{target}/tfidf-{processing}-clusters.feather"),
+    script: "scripts/cluster_kmeans.py"
 
-rule compute_biobert_clusters:
+
+rule compute_biobert_embedding_clusters:
     input:
         os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather")
     output:
-        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}-clusters.feather"),
-    script: "scripts/compute_article_clusters.py"
+        os.path.join(output_dir, "data/pubmed/{target}/biobert-{agg_func}-clusters.feather"),
+    script: "scripts/cluster_kmeans.py"
 
 rule compute_tfidf_matrix:
     input:
