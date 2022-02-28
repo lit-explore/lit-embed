@@ -10,7 +10,7 @@ from util.nlp import STOP_WORDS, STOP_WORDS_LEMMA
 stop_words = STOP_WORDS if snakemake.wildcards['processing'] == 'baseline' else STOP_WORDS_LEMMA
 
 # load articles
-dat = pd.read_csv(snakemake.input[0])
+dat = pd.read_csv(snakemake.input[0], dtype={'id': 'str'})
 
 # exclude articles with missing abstracts or titles
 if snakemake.config['exclude_articles']['missing_abstract']:
@@ -53,4 +53,10 @@ tfidf_mat = pd.DataFrame(mat.todense(),
                    index=pd.Series(ids, name='article_id'), 
                    columns=feat_names)
 
-tfidf_mat.reset_index().to_feather(snakemake.output[0])
+tfidf_mat = tfidf_mat.reset_index()
+
+# explicitly convert "article_id" column to a string
+# work-around for pandas/arrow serialization issue
+tfidf_mat['article_id'] = tfidf_mat['article_id'].apply(str)
+
+tfidf_mat.to_feather(snakemake.output[0])

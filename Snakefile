@@ -35,15 +35,32 @@ targets = ['articles', 'topics']
 
 rule all:
     input:
-        expand(os.path.join(output_dir, "fig/{source}/{target}/{projection}/tfidf-{processing}.png"), source=data_sources, processing=processing_versions, target=targets, projection=projection_types),
-        expand(os.path.join(output_dir, "fig/pubmed/{target}/{projection}/biobert-{agg_func}.png"), agg_func=agg_funcs, target=targets, projection=projection_types)
+        expand(os.path.join(output_dir, "fig/{source}/{target}/{projection}/tfidf-{processing}-scatterplot.png"), source=data_sources, processing=processing_versions, target=targets, projection=projection_types),
+        expand(os.path.join(output_dir, "fig/pubmed/{target}/{projection}/biobert-{agg_func}-scatterplot.png"), agg_func=agg_funcs, target=targets, projection=projection_types)
+
+rule datashader:
+    input:
+        expand(os.path.join(output_dir, "fig/{source}/articles/umap/tfidf-{processing}-datashader.png"), source=data_sources, processing=processing_versions),
+
+rule plot_tfidf_datashader:
+    input:
+        os.path.join(output_dir, "data/{source}/{target}/{projection}/tfidf-{processing}.feather"),
+        os.path.join(output_dir, "data/{source}/{target}/tfidf-{processing}-clusters.feather"),
+    output:
+        os.path.join(output_dir, "fig/{source}/{target}/{projection}/tfidf-{processing}-datashader.png"),
+    params:
+        name="TF-IDF"
+    conda:
+        "envs/datashader.yml"
+    script:
+        "scripts/plot_datashader.py"
 
 rule plot_tfidf_scatterplot:
     input:
         os.path.join(output_dir, "data/{source}/{target}/{projection}/tfidf-{processing}.feather"),
         os.path.join(output_dir, "data/{source}/{target}/tfidf-{processing}-clusters.feather"),
     output:
-        os.path.join(output_dir, "fig/{source}/{target}/{projection}/tfidf-{processing}.png"),
+        os.path.join(output_dir, "fig/{source}/{target}/{projection}/tfidf-{processing}-scatterplot.png"),
     params:
         name="TF-IDF"
     script:
@@ -54,7 +71,7 @@ rule plot_biobert_scatterplot:
         os.path.join(output_dir, "data/pubmed/{target}/{projection}/biobert-{agg_func}.feather"),
         os.path.join(output_dir, "data/pubmed/{target}/biobert-{agg_func}-clusters.feather"),
     output:
-        os.path.join(output_dir, "fig/pubmed/{target}/{projection}/biobert-{agg_func}.png"),
+        os.path.join(output_dir, "fig/pubmed/{target}/{projection}/biobert-{agg_func}-scatterplot.png"),
     params:
         name="BioBERT"
     script:

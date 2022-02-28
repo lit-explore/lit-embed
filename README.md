@@ -72,11 +72,24 @@ The `out_dir` parameter indicates where the pipeline should store data and resul
 Usage
 -----
 
-To run the pipeline, activate the conda environment and call `snakemake`, specifying
-the desired number of threads to use with the `-j` option, e.g.:
+To run the main pipeline, activate the conda environment and call `snakemake`,
+specifying the desired number of threads to use with the `-j` option, e.g.:
 
 ```
 conda activate lit-embed
 snakemake -j8
 ```
+
+A separate entrypoint also exists to construct [datashader](https://datashader.org/)
+visualizations using large subsets of the UMAP article projections.
+
+Because datashader depends on earlier versions of Python, a separate conda environment
+has been specified for it, which snakemake will automatically detect and use when the
+`--use-conda` parameter is included:
+
+```
+snakemake -j1 --use-conda datashader
+```
+
+Due to scaling issues, the datashader rule is currently limited to UMAP projected data.
 

@@ -31,7 +31,7 @@ mask = dat.var(axis=1) > 0
 num_zero_var = dat.shape[0] - mask.sum()
 
 if num_zero_var > 0:
-    print(f"Removing {num_zero_var} articles with zero variance prior to UMAP projection.")
+    print(f"Removing {num_zero_var} articles with zero variance prior to projection.")
     dat = dat[mask]
 
 # generate projection
@@ -48,6 +48,14 @@ elif dim_method == 'tsne':
                 metric=snakemake.config['tsne']['articles']['metric'],
                 n_jobs=-1, learning_rate='auto', square_distances=True,
                 random_state=snakemake.config['random_seed'])
+
+    # for t-sne + topics, limit number of articles to avoid running out of memory
+    if target == 'topics':
+        max_articles = snakemake.config[dim_method]['topics']['max_articles']
+
+        if max_articles < dat.shape[0]:
+            ind = random.sample(range(dat.shape[0]), max_articles)
+            dat = dat.iloc[ind, :]
 
 if target == "articles":
     embedding = reducer.fit_transform(dat)

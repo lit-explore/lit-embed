@@ -10,8 +10,8 @@ random.seed(snakemake.config['random_seed'])
 
 sns.set(rc={
     "figure.figsize": (
-        snakemake.config['seaborn']['scatterplot']['width'],
-        snakemake.config['seaborn']['scatterplot']['height'],
+        snakemake.config['plots']['scatterplot']['width'],
+        snakemake.config['plots']['scatterplot']['height'],
     )
 })
 
@@ -29,7 +29,7 @@ clusters = pd.read_feather(snakemake.input[1]).set_index(index)
 dat["cluster"] = clusters.cluster.astype("category")
 
 # subsample data
-max_points = snakemake.config['seaborn']['scatterplot']['max_points']
+max_points = snakemake.config['plots']['scatterplot']['max_points']
 
 if max_points < dat.shape[0]:
     ind = random.sample(range(dat.shape[0]), max_points)
@@ -53,7 +53,7 @@ projection = snakemake.wildcards['projection']
 
 plt_title = f"{source} {target.capitalize()} {name} {projection} ({processing}, n={num_items})"
 
-size = snakemake.config['seaborn']['scatterplot']['size']
+size = snakemake.config['plots']['scatterplot']['size']
 sns.scatterplot(data=dat, x=dat.columns[0], y=dat.columns[1], hue="cluster", s=size).set(title=plt_title)
 
 plt.savefig(snakemake.output[0])

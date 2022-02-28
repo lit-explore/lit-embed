@@ -61,6 +61,7 @@ tsne:
     num: 10000
     metric: 'cosine'
     perplexity: 30
+    max_articles: 10000
 
 # UMAP settings
 umap:
@@ -78,9 +79,13 @@ umap:
     metric: 'cosine'
 
 # plot settings
-seaborn:
+plots:
   scatterplot:
     max_points: 10000
     width: 16
     height: 12
     size: 14
+  datashader:
+    max_points: 500000
+    width: 1000
+    height: 1000
