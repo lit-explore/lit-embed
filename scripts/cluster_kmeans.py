@@ -52,4 +52,10 @@ if target == 'articles':
 else:
     res = pd.DataFrame({"topic": dat.columns, "cluster": cluster_labels})
 
+# TODO: debug reason for duplicates in cluster..
+breakpoint()
+
+# work-around: remove duplicated entries
+res = res[~res.index.duplicated(keep='first')]
+
 res.to_feather(snakemake.output[0])

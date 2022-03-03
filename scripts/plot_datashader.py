@@ -23,10 +23,6 @@ else:
 dat = pd.read_feather(snakemake.input[0]).set_index(index)
 clusters = pd.read_feather(snakemake.input[1]).set_index(index)
 
-# work-around: remove duplicated entries from "clusters" dataframe;
-# will be handled upstream in the future
-clusters = clusters[~clusters.index.duplicated(keep='first')]
-
 dat["cluster"] = clusters.cluster.astype("category")
 
 # subsample data
