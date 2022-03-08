@@ -3,6 +3,7 @@ Dimension reduction
 """
 import random
 import umap
+import numpy as np
 import pandas as pd
 from sklearn.manifold import TSNE
 
@@ -26,8 +27,9 @@ else:
         ind = random.sample(range(dat.shape[1]), snakemake.config[dim_method]['topics']['num'])
         dat = dat.iloc[:, ind]
 
-# remove any articles with zero variance (done for both article/topic projections)
-mask = dat.var(axis=1) > 0
+# remove any articles with zero variance (done for both article/topic projections);
+mask = dat.apply(np.var, axis=1) > 0
+
 num_zero_var = dat.shape[0] - mask.sum()
 
 if num_zero_var > 0:
@@ -51,6 +53,7 @@ elif dim_method == 'tsne':
 
     # for t-sne + topics, limit number of articles to avoid running out of memory
     if target == 'topics':
+
         max_articles = snakemake.config[dim_method]['topics']['max_articles']
 
         if max_articles < dat.shape[0]:

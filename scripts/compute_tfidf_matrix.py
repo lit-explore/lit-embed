@@ -10,7 +10,8 @@ from util.nlp import STOP_WORDS, STOP_WORDS_LEMMA
 stop_words = STOP_WORDS if snakemake.wildcards['processing'] == 'baseline' else STOP_WORDS_LEMMA
 
 # load articles
-dat = pd.read_csv(snakemake.input[0], dtype={'id': 'str'})
+dtypes = {'id': 'str', 'doi': 'str', 'title': 'str', 'abstract': 'str', 'date': 'str'}
+dat = pd.read_csv(snakemake.input[0], dtype=dtypes)
 
 # exclude articles with missing abstracts or titles
 if snakemake.config['exclude_articles']['missing_abstract']:
@@ -30,6 +31,8 @@ corpus = []
 for index, row in dat.iterrows():
     text = (row.title + " " + row.abstract).lower()    
     corpus.append(text)
+
+del dat
 
 # default token pattern, modifed to account for minimum token lengths
 min_length = snakemake.config['tokenization']['min_length']

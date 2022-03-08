@@ -22,7 +22,7 @@ lemma_abstracts = []
 # iterate over article texts, and apply lemmatizer
 for ind, article in corpus.iterrows():
     if ind % 100 == 0:
-        print(f"Processing article {ind + 1}...")
+        print(f"lemmatization: Processing article {ind + 1}...")
 
     # moved upstream..
     #  if snakemake.config['exclude_articles']['missing_title'] and article.title == "":

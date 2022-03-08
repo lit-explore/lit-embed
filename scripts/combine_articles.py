@@ -40,9 +40,14 @@ for i, infile in enumerate(article_batches[1:]):
 if snakemake.config['dev_mode']['enabled']:
     combined = combined.sample(max_articles, random_state=snakemake.config['random_seed'])
 
-print("Finished combining article dataframes; saving result..")
+# remove duplicated entries, if found
+num_dups = combined['id'].duplicated().sum()
+
+if num_dups > 0:
+    print(f"Dropping {num_dups} duplicated article entries")
+    combined = combined[~combined['id'].duplicated(keep='first')]
 
 # storing as plain csv for now; arrow/feather runs into memory issues with larger
 # text columns
 combined = combined.reset_index(drop=True)
-combined.to_csv(snakemake.output[0])
+combined.to_csv(snakemake.output[0], index=False)
