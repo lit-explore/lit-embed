@@ -20,10 +20,14 @@ arxiv:
 
 # pubmed-related settings
 pubmed:
+  # start and end number for annual files
+  # https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
+  annual_start: 750
+  annual_end: 1114
   # start and end number for daily updates
   # https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
   updates_start: 1115
-  updates_end: 1191
+  updates_end: 1244
 
 # factors to use to decide whether to exclude an article from analysis
 exclude_articles:
@@ -34,10 +38,12 @@ exclude_articles:
 word_freq:
   # minimum/maximum number or proportion of articles which must include a term for it to
   # be used in word-freq/tf-df matrices
-  min_df: 10
+  min_df: 0.001
   max_df: 0.6
   # maximum number of features to keep
   max_features: 1000
+  # datatype
+  dtype: 'float64'
 
 tokenization:
   min_length: 2
@@ -50,15 +56,16 @@ clustering:
   topics:
     num_clusters: 15
     batch_size: 8192
+    max_articles: 100000
 
 # t-SNE settings
 tsne:
   articles:
-    num: 10000
+    num: 5000
     metric: 'cosine'
     perplexity: 30
   topics:
-    num: 10000
+    num: 5000
     metric: 'cosine'
     perplexity: 30
     max_articles: 10000
