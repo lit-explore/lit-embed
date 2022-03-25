@@ -2,6 +2,7 @@
 Computes Word Frequency Matrix 
 """
 import ujson
+import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from util.nlp import STOP_WORDS, STOP_WORDS_LEMMA
@@ -39,6 +40,7 @@ token_pattern = r"(?u)\b\w{" + str(min_length) + r",}\b"
 vectorizer = CountVectorizer(max_df=snakemake.config['word_freq']['max_df'],
                              min_df=snakemake.config['word_freq']['min_df'],
                              max_features=snakemake.config['word_freq']['max_features'],
+                             dtype=np.dtype(snakemake.config['word_freq']['dtype']),
                              stop_words=stop_words,
                              token_pattern=token_pattern)
 

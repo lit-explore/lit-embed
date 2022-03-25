@@ -75,4 +75,7 @@ for article in root.findall(".//PubmedArticle"):
 
 dat = pd.DataFrame({"id": ids, "doi": dois, "title": titles, "abstract": abstracts, "date": dates})
 
+if dat.shape[0] == 0:
+    raise Exception("No articles found with all require components!")
+
 dat.reset_index(drop=True).to_feather(snakemake.output[0])

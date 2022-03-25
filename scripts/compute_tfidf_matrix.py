@@ -2,6 +2,7 @@
 Computes TF-IDF version of word frequencies
 """
 import ujson
+import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from util.nlp import STOP_WORDS, STOP_WORDS_LEMMA
@@ -43,6 +44,7 @@ vectorizer = TfidfVectorizer(max_df=snakemake.config['word_freq']['max_df'],
                              min_df=snakemake.config['word_freq']['min_df'],
                              max_features=snakemake.config['word_freq']['max_features'],
                              stop_words=stop_words,
+                             dtype=np.dtype(snakemake.config['word_freq']['dtype']),
                              token_pattern=token_pattern)
 
 mat = vectorizer.fit_transform(corpus)

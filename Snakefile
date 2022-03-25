@@ -8,14 +8,19 @@ configfile: "config/config.yml"
 # arxiv article subset ids
 arxiv_num = [f"{n:04}" for n in range(1, config['arxiv']['num_chunks'] + 1)]
 
-# pubmed annual file numbers (2022)
-pubmed_annual = [f"{n:04}" for n in range(1, 1115)]
+# pubmed annual file numbers
+pubmed_annual = [f"{n:04}" for n in range(config['pubmed']['annual_start'], 
+                                          config['pubmed']['annual_end'] + 1)]
 
-# pubmed daily update file numbers (not yet incorporated..)
-# daily_start = config['pubmed']['updates_start']
-# daily_end = config['pubmed']['updates_end']
-#
-# pubmed_daily = [f"{n:04}" for n in range(daily_start, daily_end + 1)]
+# pubmed update file numbers
+pubmed_updates = [f"{n:04}" for n in range(config['pubmed']['updates_start'], 
+                                          config['pubmed']['updates_end'] + 1)]
+
+# exclude pubmed22n0654.xml.gz (missing abstracts for all entries)
+if config['exclude_articles']['missing_abstract']:
+    pubmed_annual = [x for x in pubmed_annual if x != "0654"]
+
+pubmed_all = pubmed_annual + pubmed_updates
 
 model_dir = os.path.join(config['out_dir'], 'models')
 input_dir = os.path.join(config['out_dir'], 'input')
@@ -149,7 +154,7 @@ rule combine_arxiv_articles:
 
 rule combine_pubmed_lemmatized_articles:
     input:
-        expand(os.path.join(input_dir, "pubmed/lemmatized/{pubmed_num}.feather"), pubmed_num=pubmed_annual)
+        expand(os.path.join(input_dir, "pubmed/lemmatized/{pubmed_num}.feather"), pubmed_num=pubmed_all)
     output:
         os.path.join(output_dir, "data/pubmed/articles-lemmatized.csv")
     script:
@@ -158,7 +163,7 @@ rule combine_pubmed_lemmatized_articles:
 # combine articles and sub-sample, if enabled
 rule combine_pubmed_articles:
     input:
-        expand(os.path.join(input_dir, "pubmed/orig/{pubmed_num}.feather"), pubmed_num=pubmed_annual)
+        expand(os.path.join(input_dir, "pubmed/orig/{pubmed_num}.feather"), pubmed_num=pubmed_all)
     output:
         os.path.join(output_dir, "data/pubmed/articles-baseline.csv")
     script:
@@ -166,7 +171,7 @@ rule combine_pubmed_articles:
 
 rule combine_embeddings:
     input:
-        expand(os.path.join(output_dir, "data/pubmed/biobert/{{agg_func}}/{pubmed_num}.feather"), pubmed_num=pubmed_annual),
+        expand(os.path.join(output_dir, "data/pubmed/biobert/{{agg_func}}/{pubmed_num}.feather"), pubmed_num=pubmed_all),
     output:
         os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather")
     script:
@@ -224,13 +229,23 @@ rule download_biobert:
         git clone https://huggingface.co/dmis-lab/biobert-v1.1
         """
 
-rule download_pubmed_baseline_data:
+rule download_pubmed_data:
     output:
         os.path.join(input_dir, "pubmed/raw/pubmed22n{pubmed_num}.xml.gz")
     shell:
         """
         cd `dirname {output}`
-        wget "https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed22n${pubmed_num}.xml.gz"
+
+        if [ "{wildcards.pubmed_num}" -gt "{config[pubmed][annual_end]}" ]; then
+            echo "daily!";
+            ftpdir="updatefiles"
+        else
+            echo "annual!"
+            ftpdir="baseline"
+        fi
+
+        echo "https://ftp.ncbi.nlm.nih.gov/pubmed/${{ftpdir}}/pubmed22n{wildcards.pubmed_num}.xml.gz"
+        wget "https://ftp.ncbi.nlm.nih.gov/pubmed/${{ftpdir}}/pubmed22n{wildcards.pubmed_num}.xml.gz"
         """
 
 rule download_arxiv_data: 
@@ -243,17 +258,3 @@ rule download_arxiv_data:
         unzip arxiv.zip
         rm arxiv.zip
         """
-
-# rule download_pubmed_daily_data:
-#     output:
-#         os.path.join(config['out_dir'], "data/pubmed/updatefiles/pubmed22n{pubmed_update_num}.xml.gz")
-#     shell:
-#         """
-#         cd `dirname {output}`
-#
-#         for i in $(seq -w 0001 1114); do
-#             echo $i
-#             wget "https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed22n${i}.xml.gz"
-#         done
-#         """
-

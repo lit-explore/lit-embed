@@ -17,6 +17,10 @@ model = AutoModel.from_pretrained(model_dir).eval().cuda()
 # load articles dataframe
 dat = pd.read_feather(snakemake.input[0])
 
+# sanity check
+if dat.shape[0] == 0:
+    raise Exception("Empty data frame encountered!")
+
 # exclude articles with missing abstracts or titles
 if snakemake.config['exclude_articles']['missing_abstract']:
     dat = dat[~dat.abstract.isna()]
