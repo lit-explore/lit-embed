@@ -4,20 +4,21 @@ lit-embed
 Overview
 --------
 
-![arxiv tf-idf t-SNE plot](extra/arxiv-lemma-tfidf-tsne.png)
+![BioBERT vs. TF-IDF UMAP (1m Pubmed articles)](extra/biobert_vs_tfidf_lemmatized_1m_articles.png)
 
-Pipeline to explore alternative approaches to scientific literature embeddings, 
-detection of maximally informative terms associated with different areas of research,
-and to infer and visualize a concept-concept network that refelects the topics of
-research contained in the different bodies of research.
+`lit-embed` is a computational pipeline used to explore alternative approaches to
+scientific literature embeddings, detection of maximally informative terms associated
+with different areas of research, and to infer and visualize a concept-concept network
+that refelects the topics of research contained in the different bodies of research.
 
 Two main sources of open data are explored:
 
 1. [arXiv](https://arxiv.org/)
 2. [Pubmed](https://pubmed.ncbi.nlm.nih.gov/) [not yet implemented]
 
-_Figure_: arXiv TF-IDF t-SNE projected articles and clusters. For each cluster, the the
-most frequent words associated with articles in the cluster are shown.
+_Figure_: Comparison of article embeddings generated using BioBERT (left) and TF-IDF
+(right) for 1 million Pubmed articles. Color corresponds to the cluster of the embedded
+article.
 
 Learning Objective
 ------------------
