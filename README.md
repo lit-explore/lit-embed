@@ -14,7 +14,7 @@ that refelects the topics of research contained in the different bodies of resea
 Two main sources of open data are explored:
 
 1. [arXiv](https://arxiv.org/)
-2. [Pubmed](https://pubmed.ncbi.nlm.nih.gov/) [not yet implemented]
+2. [Pubmed](https://pubmed.ncbi.nlm.nih.gov/)
 
 _Figure_: Comparison of article embeddings generated using BioBERT (left) and TF-IDF
 (right) for 1 million Pubmed articles. Color corresponds to the cluster of the embedded
