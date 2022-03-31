@@ -53,6 +53,11 @@ else:
 if target == 'articles':
     id_col = 'article_id'
     res = pd.DataFrame({"article_id": dat.index, "cluster": cluster_labels})
+
+    # sanity check: make sure no duplicated article ids are found
+    if res.index.duplicated().sum() > 0:
+        raise Exception("Encountered duplicate article IDs!")
+
 else:
     id_col = 'topic'
     res = pd.DataFrame({"topic": dat.columns, "cluster": cluster_labels})

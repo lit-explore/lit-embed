@@ -118,6 +118,8 @@ rule compute_tfidf_matrix:
        os.path.join(output_dir, "data/{source}/articles-{processing}.csv") 
     output:
         os.path.join(output_dir, "data/{source}/tfidf-{processing}.feather"),
+        os.path.join(output_dir, "data/{source}/tfidf-{processing}-sparse-mat.npz"),
+        os.path.join(output_dir, "data/{source}/tfidf-{processing}-stats.feather"),
     script: "scripts/compute_tfidf_matrix.py"
 
 rule compute_word_counts:

@@ -39,7 +39,7 @@ token_pattern = r"(?u)\b\w{" + str(min_length) + r",}\b"
 # get word frequency matrix
 vectorizer = CountVectorizer(max_df=snakemake.config['word_freq']['max_df'],
                              min_df=snakemake.config['word_freq']['min_df'],
-                             max_features=snakemake.config['word_freq']['max_features'],
+                             max_features=snakemake.config['word_freq']['num_features'],
                              dtype=np.dtype(snakemake.config['word_freq']['dtype']),
                              stop_words=stop_words,
                              token_pattern=token_pattern)

@@ -26,7 +26,6 @@ else:
 # add cluster assignments
 dat = pd.read_feather(snakemake.input[0]).set_index(index)
 clusters = pd.read_feather(snakemake.input[1]).set_index(index)
-dat["cluster"] = clusters.cluster.astype("category")
 
 # subsample data
 max_points = snakemake.config['plots']['scatterplot']['max_points']
