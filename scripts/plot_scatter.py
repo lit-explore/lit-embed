@@ -27,6 +27,8 @@ else:
 dat = pd.read_feather(snakemake.input[0]).set_index(index)
 clusters = pd.read_feather(snakemake.input[1]).set_index(index)
 
+dat['cluster'] = clusters.loc[dat.index].cluster
+
 # subsample data
 max_points = snakemake.config['plots']['scatterplot']['max_points']
 
@@ -53,6 +55,7 @@ projection = snakemake.wildcards['projection']
 plt_title = f"{source} {target.capitalize()} {name} {projection} ({processing}, n={num_items})"
 
 size = snakemake.config['plots']['scatterplot']['size']
+
 sns.scatterplot(data=dat, x=dat.columns[0], y=dat.columns[1], hue="cluster", s=size).set(title=plt_title)
 
 plt.savefig(snakemake.output[0])

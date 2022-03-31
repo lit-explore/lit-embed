@@ -43,20 +43,26 @@ GENSIM_STOP_WORDS = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'ag
         'whom', 'whose', 'why', 'will', 'with', 'within', 'without', 'would', 'yet',
         'you', 'your', 'yours', 'yourself', 'yourselves']
 
-STOP_WORDS = GENSIM_STOP_WORDS + ['10', 'analysis', 'applications', 'approach',
-        'associated', 'based', 'case', 'compared', 'consider', 'current', 'data',
-        'demonstrate', 'different', 'effect', 'effective', 'effects', 'equation',
-        'equations', 'evidence', 'examined', 'findings', 'following', 'function',
-        'functions', 'given', 'identified', 'important', 'including', 'induced',
-        'investigate', 'investigated', 'known', 'large', 'like', 'mathbb', 'mathcal',
-        'mathrm', 'method', 'methods', 'model', 'models', 'new', 'non', 'novel',
-        'observed', 'obtain', 'obtained', 'paper', 'parameter', 'parameters',
-        'particular', 'performance', 'performed', 'possible', 'presence', 'present',
-        'problem', 'problems', 'properties', 'propose', 'proposed', 'prove', 'provide',
-        'range', 'recent', 'related', 'respectively', 'result', 'results', 'revealed',
+# add common numbers
+STOP_WORDS = GENSIM_STOP_WORDS + [f"{x:02}" for x in range(20)]
+
+# add other words of questionable informativeness
+STOP_WORDS = STOP_WORDS + ['affect', 'aim', 'analysis', 'applications', 'approach',
+        'article', 'assess', 'associated', 'based', 'case', 'compared', 'consider',
+        'current', 'data', 'design', 'demonstrate', 'determine', 'different', 'discuss',
+        'effect', 'effective', 'effects', 'equation', 'equations', 'erratum',
+        'evidence', 'evaluate', 'examined', 'experience', 'findings', 'following',
+        'function', 'functions', 'given', 'identified', 'important', 'including',
+        'induced', 'investigate', 'investigated', 'key', 'known', 'large', 'like',
+        'mathbb', 'mathcal', 'mathrm', 'method', 'methods', 'model', 'models', 'need',
+        'new', 'non', 'novel', 'observed', 'obtain', 'obtained', 'outcome', 'paper',
+        'parameter', 'parameters', 'particular', 'performance', 'performed', 'possible',
+        'presence', 'present', 'problem', 'problems', 'properties', 'propose',
+        'proposed', 'prove', 'provide', 'range', 'recent', 'related', 'relationship',
+        'research', 'respectively', 'report', 'result', 'results', 'revealed', 'review', 'role',
         'set', 'showed', 'shown', 'significant', 'significantly', 'solution',
-        'solutions', 'studies', 'study', 'term', 'terms', 'theory', 'type', 'use',
-        'values', 'work']
+        'solutions', 'strategy', 'studies', 'study', 'technique', 'term', 'terms',
+        'test', 'theory', 'type', 'use', 'values', 'work', 'year']
 
 # create lemmatized version of stopwords
 try:
