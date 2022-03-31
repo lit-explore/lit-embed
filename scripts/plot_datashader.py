@@ -7,25 +7,17 @@ import datashader as ds
 import datashader.utils as utils
 import datashader.transfer_functions as tf
 import random
-#import seaborn as sns
 
 random.seed(snakemake.config['random_seed'])
 
 # load data
-target = snakemake.wildcards['target']
+dat = pd.read_feather(snakemake.input[0]).set_index('article_id')
+clusters = pd.read_feather(snakemake.input[1]).set_index('article_id')
 
-if target == 'articles':
-    index = 'article_id'
-else:
-    index = 'topic'
-
-# add cluster assignments
-dat = pd.read_feather(snakemake.input[0]).set_index(index)
-clusters = pd.read_feather(snakemake.input[1]).set_index(index)
-
+# add cluster assignments to projected data
 dat["cluster"] = clusters.cluster.astype("category")
 
-# subsample data
+# subsample
 max_points = snakemake.config['plots']['datashader']['max_points']
 
 if max_points < dat.shape[0]:
@@ -49,7 +41,8 @@ else:
 
 color_key = dict(zip(cluster_labels, pal))
 
-canvas = ds.Canvas(plot_width=1000, plot_height=1000)
+canvas = ds.Canvas(plot_width=snakemake.config['plots']['datashader']['width'], 
+                   plot_height=snakemake.config['plots']['datashader']['height'])
 agg = canvas.points(dat, dat.columns[0], dat.columns[1], ds.count_cat("cluster"))
 img = tf.shade(agg, color_key=color_key, how="eq_hist")
 

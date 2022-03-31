@@ -22,7 +22,7 @@ arxiv:
 pubmed:
   # start and end number for annual files
   # https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
-  annual_start: 750
+  annual_start: 1000
   annual_end: 1114
   # start and end number for daily updates
   # https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
@@ -40,10 +40,14 @@ word_freq:
   # be used in word-freq/tf-df matrices
   min_df: 0.001
   max_df: 0.6
-  # maximum number of features to keep
-  max_features: 1000
   # datatype
   dtype: 'float64'
+  # number of frequent (word-freq) or top-scoring (tf-idf) features to use for embeddings
+  num_features: 768
+  # for tf-idf feature selection, relative contribution of mean tf-idf vs. idf;
+  # value should be between "0" and "1", with values closer to "1" corresponding to a
+  # larger contribution from the mean tf-idf value for each term
+  alpha: 0.8
 
 tokenization:
   min_length: 2
@@ -74,7 +78,7 @@ tsne:
 umap:
   articles:
     num: 500000
-    densmap: true
+    densmap: false
     n_neighbors: 25
     min_dist: 0.1
     metric: 'cosine'
@@ -93,6 +97,6 @@ plots:
     height: 12
     size: 14
   datashader:
-    max_points: 500000
+    max_points: 1000000
     width: 1000
     height: 1000

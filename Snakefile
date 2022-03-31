@@ -46,15 +46,29 @@ rule all:
 rule datashader:
     input:
         expand(os.path.join(output_dir, "fig/{source}/articles/umap/tfidf-{processing}-datashader.png"), source=data_sources, processing=processing_versions),
+        expand(os.path.join(output_dir, "fig/pubmed/articles/umap/biobert-{agg_func}-datashader.png"), agg_func=agg_funcs)
 
 rule plot_tfidf_datashader:
     input:
-        os.path.join(output_dir, "data/{source}/{target}/{projection}/tfidf-{processing}.feather"),
-        os.path.join(output_dir, "data/{source}/{target}/tfidf-{processing}-clusters.feather"),
+        os.path.join(output_dir, "data/{source}/articles/umap/tfidf-{processing}.feather"),
+        os.path.join(output_dir, "data/{source}/articles/tfidf-{processing}-clusters.feather"),
     output:
-        os.path.join(output_dir, "fig/{source}/{target}/{projection}/tfidf-{processing}-datashader.png"),
+        os.path.join(output_dir, "fig/{source}/articles/umap/tfidf-{processing}-datashader.png"),
     params:
         name="TF-IDF"
+    conda:
+        "envs/datashader.yml"
+    script:
+        "scripts/plot_datashader.py"
+
+rule plot_biobert_datashader:
+    input:
+        os.path.join(output_dir, "data/pubmed/articles/umap/biobert-{agg_func}.feather"),
+        os.path.join(output_dir, "data/pubmed/articles/biobert-{agg_func}-clusters.feather"),
+    output:
+        os.path.join(output_dir, "fig/pubmed/articles/umap/biobert-{agg_func}-datashader.png"),
+    params:
+        name="BioBERT"
     conda:
         "envs/datashader.yml"
     script:
