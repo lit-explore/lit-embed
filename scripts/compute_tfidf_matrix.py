@@ -89,8 +89,6 @@ stats = pd.DataFrame({
     "score": (tfidf_coef * scaled_mean_tfidf) + (idf_coef * scaled_idf)
 })
 
-stats['score'] = 
-
 stats.to_feather(snakemake.output[2])
 
 # get indices of top N features

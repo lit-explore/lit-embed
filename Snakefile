@@ -2,6 +2,7 @@
 Science literature embedding pipeline
 """
 import os
+import pandas as pd
 
 configfile: "config/config.yml"
 
@@ -41,12 +42,14 @@ targets = ['articles', 'topics']
 rule all:
     input:
         expand(os.path.join(output_dir, "fig/{source}/{target}/{projection}/tfidf-{processing}-scatterplot.png"), source=data_sources, processing=processing_versions, target=targets, projection=projection_types),
-        expand(os.path.join(output_dir, "fig/pubmed/{target}/{projection}/biobert-{agg_func}-scatterplot.png"), agg_func=agg_funcs, target=targets, projection=projection_types)
+        expand(os.path.join(output_dir, "fig/pubmed/{target}/{projection}/biobert-{agg_func}-scatterplot.png"), agg_func=agg_funcs, target=targets, projection=projection_types),
+        expand(os.path.join(output_dir, "fig/arxiv/{target}/{projection}/scibert-{agg_func}-scatterplot.png"), agg_func=agg_funcs, target=targets, projection=projection_types),
 
 rule datashader:
     input:
         expand(os.path.join(output_dir, "fig/{source}/articles/umap/tfidf-{processing}-datashader.png"), source=data_sources, processing=processing_versions),
-        expand(os.path.join(output_dir, "fig/pubmed/articles/umap/biobert-{agg_func}-datashader.png"), agg_func=agg_funcs)
+        expand(os.path.join(output_dir, "fig/pubmed/articles/umap/biobert-{agg_func}-datashader.png"), agg_func=agg_funcs),
+        expand(os.path.join(output_dir, "fig/arxiv/articles/umap/scibert-{agg_func}-datashader.png"), agg_func=agg_funcs)
 
 rule plot_tfidf_datashader:
     input:
@@ -56,6 +59,19 @@ rule plot_tfidf_datashader:
         os.path.join(output_dir, "fig/{source}/articles/umap/tfidf-{processing}-datashader.png"),
     params:
         name="TF-IDF"
+    conda:
+        "envs/datashader.yml"
+    script:
+        "scripts/plot_datashader.py"
+
+rule plot_scibert_datashader:
+    input:
+        os.path.join(output_dir, "data/arxiv/articles/umap/scibert-{agg_func}.feather"),
+        os.path.join(output_dir, "data/arxiv/articles/scibert-{agg_func}-clusters.feather"),
+    output:
+        os.path.join(output_dir, "fig/arxiv/articles/umap/scibert-{agg_func}-datashader.png"),
+    params:
+        name="SciBERT"
     conda:
         "envs/datashader.yml"
     script:
@@ -92,7 +108,18 @@ rule plot_biobert_scatterplot:
     output:
         os.path.join(output_dir, "fig/pubmed/{target}/{projection}/biobert-{agg_func}-scatterplot.png"),
     params:
-        name="BioBERT"
+        name="SciBERT"
+    script:
+        "scripts/plot_scatter.py"
+
+rule plot_scibert_scatterplot:
+    input:
+        os.path.join(output_dir, "data/arxiv/{target}/{projection}/scibert-{agg_func}.feather"),
+        os.path.join(output_dir, "data/arxiv/{target}/scibert-{agg_func}-clusters.feather"),
+    output:
+        os.path.join(output_dir, "fig/arxiv/{target}/{projection}/scibert-{agg_func}-scatterplot.png"),
+    params:
+        name="SciBERT"
     script:
         "scripts/plot_scatter.py"
 
@@ -112,20 +139,55 @@ rule biobert_dimension_reduction:
     script:
         "scripts/reduce_dimension.py"
 
-rule compute_tfidf_clusters:
+rule scibert_dimension_reduction:
+    input:
+        os.path.join(output_dir, "data/arxiv/scibert-{agg_func}.feather")
+    output:
+        os.path.join(output_dir, "data/arxiv/{target}/{projection}/scibert-{agg_func}.feather"),
+    script:
+        "scripts/reduce_dimension.py"
+
+rule compute_tfidf_article_clusters:
     input:
         os.path.join(output_dir, "data/{source}/tfidf-{processing}.feather"),
     output:
-        os.path.join(output_dir, "data/{source}/{target}/tfidf-{processing}-clusters.feather"),
-    script: "scripts/cluster_kmeans.py"
+        os.path.join(output_dir, "data/{source}/articles/tfidf-{processing}-clusters.feather"),
+    script: "scripts/cluster_articles.py"
 
+rule compute_tfidf_topic_clusters:
+    input:
+        os.path.join(output_dir, "data/{source}/tfidf-{processing}.feather"),
+    output:
+        os.path.join(output_dir, "data/{source}/topics/tfidf-{processing}-clusters.feather"),
+    script: "scripts/cluster_topics.py"
 
-rule compute_biobert_embedding_clusters:
+rule compute_biobert_embedding_article_clusters:
     input:
         os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather")
     output:
-        os.path.join(output_dir, "data/pubmed/{target}/biobert-{agg_func}-clusters.feather"),
-    script: "scripts/cluster_kmeans.py"
+        os.path.join(output_dir, "data/pubmed/articles/biobert-{agg_func}-clusters.feather"),
+    script: "scripts/cluster_articles.py"
+
+rule compute_biobert_embedding_topic_clusters:
+    input:
+        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather")
+    output:
+        os.path.join(output_dir, "data/pubmed/topics/biobert-{agg_func}-clusters.feather"),
+    script: "scripts/cluster_topics.py"
+
+rule compute_scibert_embedding_article_clusters:
+    input:
+        os.path.join(output_dir, "data/arxiv/scibert-{agg_func}.feather")
+    output:
+        os.path.join(output_dir, "data/arxiv/articles/scibert-{agg_func}-clusters.feather"),
+    script: "scripts/cluster_articles.py"
+
+rule compute_scibert_embedding_topic_clusters:
+    input:
+        os.path.join(output_dir, "data/arxiv/scibert-{agg_func}.feather")
+    output:
+        os.path.join(output_dir, "data/arxiv/topics/scibert-{agg_func}-clusters.feather"),
+    script: "scripts/cluster_topics.py"
 
 rule compute_tfidf_matrix:
     input:
@@ -185,7 +247,16 @@ rule combine_pubmed_articles:
     script:
         "scripts/combine_articles.py"
 
-rule combine_embeddings:
+rule combine_arxiv_embeddings:
+    input:
+        expand(os.path.join(output_dir,
+            "data/arxiv/scibert/{{agg_func}}/{arxiv_num}.feather"), arxiv_num=arxiv_num),
+    output:
+        os.path.join(output_dir, "data/arxiv/scibert-{agg_func}.feather")
+    script:
+        "scripts/combine_embeddings.py"
+
+rule combine_pubmed_embeddings:
     input:
         expand(os.path.join(output_dir, "data/pubmed/biobert/{{agg_func}}/{pubmed_num}.feather"), pubmed_num=pubmed_all),
     output:
@@ -193,7 +264,17 @@ rule combine_embeddings:
     script:
         "scripts/combine_embeddings.py"
 
-rule create_embeddings:
+rule create_arxiv_scibert_embeddings:
+    input:
+        os.path.join(input_dir, "arxiv/orig/{arxiv_num}.feather"),
+        os.path.join(model_dir, "scibert_scivocab_uncased/pytorch_model.bin")
+    output:
+        os.path.join(output_dir, "data/arxiv/scibert/mean/{arxiv_num}.feather"),
+        os.path.join(output_dir, "data/arxiv/scibert/median/{arxiv_num}.feather"),
+    script:
+        "scripts/create_biobert_embeddings.py"
+
+rule create_pubmed_biobert_embeddings:
     input:
         os.path.join(input_dir, "pubmed/orig/{pubmed_num}.feather"),
         os.path.join(model_dir, "biobert-v1.1/pytorch_model.bin")
@@ -235,6 +316,17 @@ rule parse_arxiv_json:
     script:
         "scripts/parse_arxiv_json.py"
 
+rule download_scibert:
+    output:
+        os.path.join(model_dir, "scibert_scivocab_uncased/pytorch_model.bin")
+    shell:
+        """
+        cd `dirname {output}`
+        cd ..
+        git lfs install
+        git clone https://huggingface.co/allenai/scibert_scivocab_uncased 
+        """
+
 rule download_biobert:
     output:
         os.path.join(model_dir, "biobert-v1.1/pytorch_model.bin")
@@ -242,6 +334,7 @@ rule download_biobert:
         """
         cd `dirname {output}`
         cd ..
+        git lfs install
         git clone https://huggingface.co/dmis-lab/biobert-v1.1
         """
 
