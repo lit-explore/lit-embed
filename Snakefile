@@ -3,6 +3,7 @@ Science literature embedding pipeline
 """
 import os
 import pandas as pd
+from scipy.stats import pearsonr
 
 configfile: "config/config.yml"
 
@@ -44,12 +45,42 @@ rule all:
         expand(os.path.join(output_dir, "fig/{source}/{target}/{projection}/tfidf-{processing}-scatterplot.png"), source=data_sources, processing=processing_versions, target=targets, projection=projection_types),
         expand(os.path.join(output_dir, "fig/pubmed/{target}/{projection}/biobert-{agg_func}-scatterplot.png"), agg_func=agg_funcs, target=targets, projection=projection_types),
         expand(os.path.join(output_dir, "fig/arxiv/{target}/{projection}/scibert-{agg_func}-scatterplot.png"), agg_func=agg_funcs, target=targets, projection=projection_types),
+        expand(os.path.join(output_dir, "data/pubmed/comparison/biobert-{agg_func}-tfidf-{processing}.feather"), agg_func=agg_funcs, processing=processing_versions),
 
 rule datashader:
     input:
         expand(os.path.join(output_dir, "fig/{source}/articles/umap/tfidf-{processing}-datashader.png"), source=data_sources, processing=processing_versions),
         expand(os.path.join(output_dir, "fig/pubmed/articles/umap/biobert-{agg_func}-datashader.png"), agg_func=agg_funcs),
         expand(os.path.join(output_dir, "fig/arxiv/articles/umap/scibert-{agg_func}-datashader.png"), agg_func=agg_funcs)
+
+rule embedding_correlation:
+    input:
+        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather"),
+        os.path.join(output_dir, "data/pubmed/tfidf-{processing}.feather")
+    output:
+        os.path.join(output_dir, "data/pubmed/comparison/biobert-{agg_func}-tfidf-{processing}.feather")
+    run:
+        df1 = pd.read_feather(input[0]).set_index('article_id')
+        df2 = pd.read_feather(input[1]).set_index('article_id')
+
+        shared_ids = list(set(df1.index).intersection(df2.index))
+
+        df1 = df1.loc[shared_ids]
+        df2 = df2.loc[shared_ids]
+ 
+        # corrwith doesn't scale
+        # df2.columns = df1.columns
+        # cor_mat = df1.corrwith(df2, axis=1)
+
+        # compare article correlations across embeddings
+        cors = []
+
+        for i in range(df1.shape[0]):
+            cors.append(pearsonr(df1.iloc[i, :], df2.iloc[i, :])[0])
+
+        res = pd.DataFrame({"article_id": df1.index, "pearson_cor": cors})
+
+        res.to_feather(output[0])
 
 rule plot_tfidf_datashader:
     input:
