@@ -1,6 +1,7 @@
 """
 Computes topic clusters
 """
+import math
 import pandas as pd
 from sklearn.cluster import AgglomerativeClustering
 
@@ -23,7 +24,10 @@ clustering = AgglomerativeClustering(num_clusters,
 
 clusters = clustering.fit(dat.T).labels_
 
-cluster_labels = [f"cluster_{x}" for x in clusters]
+# note: modify if > 99 clusters are requested..
+precision = math.ceil(math.log(num_clusters + 1, 10))
+
+cluster_labels = [f"cluster_{x:0{precision}}" for x in clusters]
 
 res = pd.DataFrame({"topic": dat.columns, "cluster": cluster_labels})
 

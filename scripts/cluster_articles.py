@@ -1,6 +1,7 @@
 """
 Computes article clusters
 """
+import math
 import pandas as pd
 from sklearn.cluster import MiniBatchKMeans
 
@@ -37,7 +38,8 @@ if "processing" in snakemake.wildcards:
 
 else:
     # otherwise, just assign generic cluster names for now
-    cluster_labels = [f"cluster_{x}" for x in clusters]
+    precision = math.ceil(math.log(num_clusters + 1, 10))
+    cluster_labels = [f"cluster_{x:0{precision}}" for x in clusters]
 
 res = pd.DataFrame({"article_id": dat.index, "cluster": cluster_labels})
 

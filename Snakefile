@@ -43,6 +43,7 @@ targets = ['articles', 'topics']
 rule all:
     input:
         expand(os.path.join(output_dir, "fig/{source}/{target}/{projection}/tfidf-{processing}-scatterplot.png"), source=data_sources, processing=processing_versions, target=targets, projection=projection_types),
+        expand(os.path.join(output_dir, "data/{source}/clusters/tfidf-{processing}-mean-embedding.feather"), source=data_sources, processing=processing_versions),
         expand(os.path.join(output_dir, "fig/pubmed/{target}/{projection}/biobert-{agg_func}-scatterplot.png"), agg_func=agg_funcs, target=targets, projection=projection_types),
         expand(os.path.join(output_dir, "fig/arxiv/{target}/{projection}/scibert-{agg_func}-scatterplot.png"), agg_func=agg_funcs, target=targets, projection=projection_types),
         expand(os.path.join(output_dir, "data/pubmed/comparison/biobert-{agg_func}-tfidf-{processing}.feather"), agg_func=agg_funcs, processing=processing_versions),
@@ -53,7 +54,17 @@ rule datashader:
         expand(os.path.join(output_dir, "fig/pubmed/articles/umap/biobert-{agg_func}-datashader.png"), agg_func=agg_funcs),
         expand(os.path.join(output_dir, "fig/arxiv/articles/umap/scibert-{agg_func}-datashader.png"), agg_func=agg_funcs)
 
-rule embedding_correlation:
+rule compute_cluster_average_embeddings:
+    input:
+        os.path.join(output_dir, "data/{source}/tfidf-{processing}.feather"),
+        os.path.join(output_dir, "data/{source}/articles/tfidf-{processing}-clusters.feather"),
+    output:
+        os.path.join(output_dir, "data/{source}/clusters/tfidf-{processing}-mean-embedding.feather"),
+        os.path.join(output_dir, "data/{source}/clusters/tfidf-{processing}-mean-embedding-summary.feather"),
+    script:
+        "scripts/compute_cluster_average_embeddings.py"
+
+rule compute_embedding_correlation:
     input:
         os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather"),
         os.path.join(output_dir, "data/pubmed/tfidf-{processing}.feather")
