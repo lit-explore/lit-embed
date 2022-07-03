@@ -47,6 +47,8 @@ rule all:
         expand(os.path.join(output_dir, "fig/pubmed/{target}/{projection}/biobert-{agg_func}-scatterplot.png"), agg_func=agg_funcs, target=targets, projection=projection_types),
         expand(os.path.join(output_dir, "fig/arxiv/{target}/{projection}/scibert-{agg_func}-scatterplot.png"), agg_func=agg_funcs, target=targets, projection=projection_types),
         expand(os.path.join(output_dir, "data/pubmed/comparison/biobert-{agg_func}-tfidf-{processing}.feather"), agg_func=agg_funcs, processing=processing_versions),
+        os.path.join(output_dir, "data/pubmed/word-stats/baseline.feather"),
+        os.path.join(output_dir, "data/pubmed/word-stats/lemmatized.feather"),
 
 rule datashader:
     input:
@@ -240,21 +242,6 @@ rule compute_tfidf_matrix:
         os.path.join(output_dir, "data/{source}/tfidf-{processing}-stats.feather"),
     script: "scripts/compute_tfidf_matrix.py"
 
-rule compute_word_counts:
-    input:
-        os.path.join(output_dir, "data/{source}/word-freq-{processing}.feather"),
-    output:
-        os.path.join(output_dir, "data/{source}/word-counts-{processing}.feather")
-    script:
-        "scripts/compute_word_counts.py"
-
-rule compute_word_freq_matrix:
-    input:
-       os.path.join(output_dir, "data/{source}/articles-{processing}.csv") 
-    output:
-        os.path.join(output_dir, "data/{source}/word-freq-{processing}.feather"),
-    script: "scripts/compute_word_freq_matrix.py"
-
 rule combine_arxiv_lemmatized_articles:
     input:
         expand(os.path.join(input_dir, "arxiv/lemmatized/{arxiv_num}.feather"), arxiv_num=arxiv_num)
@@ -266,7 +253,7 @@ rule combine_arxiv_lemmatized_articles:
 # combine articles and sub-sample, if enabled
 rule combine_arxiv_articles:
     input:
-        expand(os.path.join(input_dir, "arxiv/orig/{arxiv_num}.feather"), arxiv_num=arxiv_num)
+        expand(os.path.join(input_dir, "arxiv/baseline/{arxiv_num}.feather"), arxiv_num=arxiv_num)
     output:
         os.path.join(output_dir, "data/arxiv/articles-baseline.csv")
     script:
@@ -280,10 +267,44 @@ rule combine_pubmed_lemmatized_articles:
     script:
         "scripts/combine_articles.py"
 
+# TODO: arxiv..
+
+rule combine_baseline_pubmed_word_stats:
+    input:
+        expand(os.path.join(output_dir, "data/pubmed/word-stats/batches/baseline/{pubmed_num}.feather"), pubmed_num=pubmed_all)
+    output:
+        os.path.join(output_dir, "data/pubmed/word-stats/baseline.feather")
+    script:
+        "scripts/combine_word_stats.py"
+
+rule combine_lemmatized_pubmed_word_stats:
+    input:
+        expand(os.path.join(output_dir, "data/pubmed/word-stats/batches/lemmatized/{pubmed_num}.feather"), pubmed_num=pubmed_all)
+    output:
+        os.path.join(output_dir, "data/pubmed/word-stats/lemmatized.feather")
+    script:
+        "scripts/combine_word_stats.py"
+
+rule compute_baseline_pubmed_word_stats:
+    input:
+        os.path.join(input_dir, "pubmed/baseline/{pubmed_num}.feather")
+    output:
+        os.path.join(output_dir, "data/pubmed/word-stats/batches/baseline/{pubmed_num}.feather")
+    script:
+        "scripts/compute_word_stats.py"
+
+rule compute_lemmatized_pubmed_word_stats:
+    input:
+        os.path.join(input_dir, "pubmed/lemmatized/{pubmed_num}.feather")
+    output:
+        os.path.join(output_dir, "data/pubmed/word-stats/batches/lemmatized/{pubmed_num}.feather")
+    script:
+        "scripts/compute_word_stats.py"
+
 # combine articles and sub-sample, if enabled
 rule combine_pubmed_articles:
     input:
-        expand(os.path.join(input_dir, "pubmed/orig/{pubmed_num}.feather"), pubmed_num=pubmed_all)
+        expand(os.path.join(input_dir, "pubmed/baseline/{pubmed_num}.feather"), pubmed_num=pubmed_all)
     output:
         os.path.join(output_dir, "data/pubmed/articles-baseline.csv")
     script:
@@ -308,7 +329,7 @@ rule combine_pubmed_embeddings:
 
 rule create_arxiv_scibert_embeddings:
     input:
-        os.path.join(input_dir, "arxiv/orig/{arxiv_num}.feather"),
+        os.path.join(input_dir, "arxiv/baseline/{arxiv_num}.feather"),
         os.path.join(model_dir, "scibert_scivocab_uncased/pytorch_model.bin")
     output:
         os.path.join(output_dir, "data/arxiv/scibert/mean/{arxiv_num}.feather"),
@@ -318,7 +339,7 @@ rule create_arxiv_scibert_embeddings:
 
 rule create_pubmed_biobert_embeddings:
     input:
-        os.path.join(input_dir, "pubmed/orig/{pubmed_num}.feather"),
+        os.path.join(input_dir, "pubmed/baseline/{pubmed_num}.feather"),
         os.path.join(model_dir, "biobert-v1.1/pytorch_model.bin")
     output:
         os.path.join(output_dir, "data/pubmed/biobert/mean/{pubmed_num}.feather"),
@@ -328,7 +349,7 @@ rule create_pubmed_biobert_embeddings:
 
 rule create_lemmatized_arxiv_corpus:
     input:
-        os.path.join(input_dir, "arxiv/orig/{arxiv_num}.feather")
+        os.path.join(input_dir, "arxiv/baseline/{arxiv_num}.feather")
     output:
         os.path.join(input_dir, "arxiv/lemmatized/{arxiv_num}.feather")
     script:
@@ -336,7 +357,7 @@ rule create_lemmatized_arxiv_corpus:
 
 rule create_lemmatized_pubmed_corpus:
     input:
-        os.path.join(input_dir, "pubmed/orig/{pubmed_num}.feather")
+        os.path.join(input_dir, "pubmed/baseline/{pubmed_num}.feather")
     output:
         os.path.join(input_dir, "pubmed/lemmatized/{pubmed_num}.feather")
     script:
@@ -346,7 +367,7 @@ rule parse_pubmed_xml:
     input: 
         os.path.join(input_dir, "pubmed/raw/pubmed22n{pubmed_num}.xml.gz")
     output:
-        os.path.join(input_dir, "pubmed/orig/{pubmed_num}.feather")
+        os.path.join(input_dir, "pubmed/baseline/{pubmed_num}.feather")
     script:
         "scripts/parse_pubmed_xml.py"
 
@@ -354,7 +375,7 @@ rule parse_arxiv_json:
     input:
         os.path.join(input_dir, "arxiv/raw/arxiv-metadata-oai-snapshot.json")
     output:
-        os.path.join(input_dir, "arxiv/orig/{arxiv_num}.feather")
+        os.path.join(input_dir, "arxiv/baseline/{arxiv_num}.feather")
     script:
         "scripts/parse_arxiv_json.py"
 
