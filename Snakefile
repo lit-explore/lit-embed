@@ -49,6 +49,8 @@ rule all:
         expand(os.path.join(output_dir, "data/pubmed/comparison/biobert-{agg_func}-tfidf-{processing}.feather"), agg_func=agg_funcs, processing=processing_versions),
         os.path.join(output_dir, "data/pubmed/word-stats/baseline.feather"),
         os.path.join(output_dir, "data/pubmed/word-stats/lemmatized.feather"),
+        os.path.join(output_dir, "data/arxiv/word-stats/baseline.feather"),
+        os.path.join(output_dir, "data/arxiv/word-stats/lemmatized.feather"),
 
 rule datashader:
     input:
@@ -269,6 +271,40 @@ rule combine_pubmed_lemmatized_articles:
 
 # TODO: arxiv..
 
+# arxiv word stats
+rule combine_baseline_arxiv_word_stats:
+    input:
+        expand(os.path.join(output_dir, "data/arxiv/word-stats/batches/baseline/{arxiv_num}.feather"), arxiv_num=arxiv_num)
+    output:
+        os.path.join(output_dir, "data/arxiv/word-stats/baseline.feather")
+    script:
+        "scripts/combine_word_stats.py"
+
+rule combine_lemmatized_arxiv_word_stats:
+    input:
+        expand(os.path.join(output_dir, "data/arxiv/word-stats/batches/lemmatized/{arxiv_num}.feather"), arxiv_num=arxiv_num)
+    output:
+        os.path.join(output_dir, "data/arxiv/word-stats/lemmatized.feather")
+    script:
+        "scripts/combine_word_stats.py"
+
+rule compute_baseline_arxiv_word_stats:
+    input:
+        os.path.join(input_dir, "arxiv/baseline/{arxiv_num}.feather")
+    output:
+        os.path.join(output_dir, "data/arxiv/word-stats/batches/baseline/{arxiv_num}.feather")
+    script:
+        "scripts/compute_word_stats.py"
+
+rule compute_lemmatized_arxiv_word_stats:
+    input:
+        os.path.join(input_dir, "arxiv/lemmatized/{arxiv_num}.feather")
+    output:
+        os.path.join(output_dir, "data/arxiv/word-stats/batches/lemmatized/{arxiv_num}.feather")
+    script:
+        "scripts/compute_word_stats.py"
+
+# pubmed word stats
 rule combine_baseline_pubmed_word_stats:
     input:
         expand(os.path.join(output_dir, "data/pubmed/word-stats/batches/baseline/{pubmed_num}.feather"), pubmed_num=pubmed_all)
