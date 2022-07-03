@@ -47,10 +47,8 @@ rule all:
         expand(os.path.join(output_dir, "fig/pubmed/{target}/{projection}/biobert-{agg_func}-scatterplot.png"), agg_func=agg_funcs, target=targets, projection=projection_types),
         expand(os.path.join(output_dir, "fig/arxiv/{target}/{projection}/scibert-{agg_func}-scatterplot.png"), agg_func=agg_funcs, target=targets, projection=projection_types),
         expand(os.path.join(output_dir, "data/pubmed/comparison/biobert-{agg_func}-tfidf-{processing}.feather"), agg_func=agg_funcs, processing=processing_versions),
-        os.path.join(output_dir, "data/pubmed/word-stats/baseline.feather"),
-        os.path.join(output_dir, "data/pubmed/word-stats/lemmatized.feather"),
-        os.path.join(output_dir, "data/arxiv/word-stats/baseline.feather"),
-        os.path.join(output_dir, "data/arxiv/word-stats/lemmatized.feather"),
+        expand(os.path.join(output_dir, "data/pubmed/word-stats/summary/{processing}.feather"), processing=processing_versions),
+        expand(os.path.join(output_dir, "data/arxiv/word-stats/summary/{processing}.feather"), processing=processing_versions)
 
 rule datashader:
     input:
@@ -272,6 +270,14 @@ rule combine_pubmed_lemmatized_articles:
 # TODO: arxiv..
 
 # arxiv word stats
+rule compute_arxiv_global_word_stats:
+    input:
+        os.path.join(output_dir, "data/arxiv/word-stats/{processing}.feather"),
+    output: 
+        os.path.join(output_dir, "data/arxiv/word-stats/summary/{processing}.feather"),
+    script:
+        "scripts/compute_global_word_stats.py"
+
 rule combine_baseline_arxiv_word_stats:
     input:
         expand(os.path.join(output_dir, "data/arxiv/word-stats/batches/baseline/{arxiv_num}.feather"), arxiv_num=arxiv_num)
@@ -305,6 +311,14 @@ rule compute_lemmatized_arxiv_word_stats:
         "scripts/compute_word_stats.py"
 
 # pubmed word stats
+rule compute_pubmed_global_word_stats:
+    input:
+        os.path.join(output_dir, "data/pubmed/word-stats/{processing}.feather"),
+    output: 
+        os.path.join(output_dir, "data/pubmed/word-stats/summary/{processing}.feather"),
+    script:
+        "scripts/compute_global_word_stats.py"
+
 rule combine_baseline_pubmed_word_stats:
     input:
         expand(os.path.join(output_dir, "data/pubmed/word-stats/batches/baseline/{pubmed_num}.feather"), pubmed_num=pubmed_all)
