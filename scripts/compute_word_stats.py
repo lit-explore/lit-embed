@@ -14,7 +14,7 @@ df['total_count'] = df['title_count'] + df['abstract_count']
 res = df.groupby('token').sum()
 
 # number of articles including in each word? (document frequency)
-res['doc_freq'] = df.groupby('token').agg('count').title_count
+res['num_articles'] = df.groupby('token').agg('count').title_count
 
 # total number of articles?
 N = len(set(df.index))
@@ -24,8 +24,8 @@ idfs = []
 ridfs = []
 
 for token, row in res.iterrows():
-    idfs.append(np.log2(N / row.doc_freq))
-    ridfs.append(ridf(row.total_count, row.doc_freq, N))
+    idfs.append(np.log2(N / row.num_articles))
+    ridfs.append(ridf(row.total_count, row.num_articles, N))
 
 res['idf'] = idfs
 res['ridf'] = ridfs
