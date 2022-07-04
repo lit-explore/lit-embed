@@ -47,8 +47,8 @@ rule all:
         expand(os.path.join(output_dir, "fig/pubmed/{target}/{projection}/biobert-{agg_func}-scatterplot.png"), agg_func=agg_funcs, target=targets, projection=projection_types),
         expand(os.path.join(output_dir, "fig/arxiv/{target}/{projection}/scibert-{agg_func}-scatterplot.png"), agg_func=agg_funcs, target=targets, projection=projection_types),
         expand(os.path.join(output_dir, "data/pubmed/comparison/biobert-{agg_func}-tfidf-{processing}.feather"), agg_func=agg_funcs, processing=processing_versions),
-        expand(os.path.join(output_dir, "data/pubmed/word-stats/summary/{processing}.feather"), processing=processing_versions),
-        expand(os.path.join(output_dir, "data/arxiv/word-stats/summary/{processing}.feather"), processing=processing_versions)
+        expand(os.path.join(output_dir, "data/pubmed/word-stats/{processing}.feather"), processing=processing_versions),
+        expand(os.path.join(output_dir, "data/arxiv/word-stats/{processing}.feather"), processing=processing_versions)
 
 rule datashader:
     input:
@@ -267,89 +267,87 @@ rule combine_pubmed_lemmatized_articles:
     script:
         "scripts/combine_articles.py"
 
-# TODO: arxiv..
-
 # arxiv word stats
-rule compute_arxiv_global_word_stats:
+rule compute_arxiv_word_stats:
     input:
-        os.path.join(output_dir, "data/arxiv/word-stats/{processing}.feather"),
+        os.path.join(output_dir, "data/arxiv/word-counts/{processing}.feather"),
     output: 
-        os.path.join(output_dir, "data/arxiv/word-stats/summary/{processing}.feather"),
+        os.path.join(output_dir, "data/arxiv/word-stats/{processing}.feather"),
     script:
-        "scripts/compute_global_word_stats.py"
+        "scripts/compute_word_stats.py"
 
-rule combine_baseline_arxiv_word_stats:
+rule combine_baseline_arxiv_word_counts:
     input:
-        expand(os.path.join(output_dir, "data/arxiv/word-stats/batches/baseline/{arxiv_num}.feather"), arxiv_num=arxiv_num)
+        expand(os.path.join(output_dir, "data/arxiv/word-counts/batches/baseline/{arxiv_num}.feather"), arxiv_num=arxiv_num)
     output:
-        os.path.join(output_dir, "data/arxiv/word-stats/baseline.feather")
+        os.path.join(output_dir, "data/arxiv/word-counts/baseline.feather")
     script:
-        "scripts/combine_word_stats.py"
+        "scripts/combine_word_counts.py"
 
-rule combine_lemmatized_arxiv_word_stats:
+rule combine_lemmatized_arxiv_word_counts:
     input:
-        expand(os.path.join(output_dir, "data/arxiv/word-stats/batches/lemmatized/{arxiv_num}.feather"), arxiv_num=arxiv_num)
+        expand(os.path.join(output_dir, "data/arxiv/word-counts/batches/lemmatized/{arxiv_num}.feather"), arxiv_num=arxiv_num)
     output:
-        os.path.join(output_dir, "data/arxiv/word-stats/lemmatized.feather")
+        os.path.join(output_dir, "data/arxiv/word-counts/lemmatized.feather")
     script:
-        "scripts/combine_word_stats.py"
+        "scripts/combine_word_counts.py"
 
-rule compute_baseline_arxiv_word_stats:
+rule compute_baseline_arxiv_word_counts:
     input:
         os.path.join(input_dir, "arxiv/baseline/{arxiv_num}.feather")
     output:
-        os.path.join(output_dir, "data/arxiv/word-stats/batches/baseline/{arxiv_num}.feather")
+        os.path.join(output_dir, "data/arxiv/word-counts/batches/baseline/{arxiv_num}.feather")
     script:
-        "scripts/compute_word_stats.py"
+        "scripts/create_word_count_matrix.py"
 
-rule compute_lemmatized_arxiv_word_stats:
+rule compute_lemmatized_arxiv_word_counts:
     input:
         os.path.join(input_dir, "arxiv/lemmatized/{arxiv_num}.feather")
     output:
-        os.path.join(output_dir, "data/arxiv/word-stats/batches/lemmatized/{arxiv_num}.feather")
+        os.path.join(output_dir, "data/arxiv/word-counts/batches/lemmatized/{arxiv_num}.feather")
+    script:
+        "scripts/create_word_count_matrix.py"
+
+# pubmed word stats
+rule compute_pubmed_word_stats:
+    input:
+        os.path.join(output_dir, "data/pubmed/word-counts/{processing}.feather"),
+    output: 
+        os.path.join(output_dir, "data/pubmed/word-stats/{processing}.feather"),
     script:
         "scripts/compute_word_stats.py"
 
-# pubmed word stats
-rule compute_pubmed_global_word_stats:
+rule combine_baseline_pubmed_word_counts:
     input:
-        os.path.join(output_dir, "data/pubmed/word-stats/{processing}.feather"),
-    output: 
-        os.path.join(output_dir, "data/pubmed/word-stats/summary/{processing}.feather"),
-    script:
-        "scripts/compute_global_word_stats.py"
-
-rule combine_baseline_pubmed_word_stats:
-    input:
-        expand(os.path.join(output_dir, "data/pubmed/word-stats/batches/baseline/{pubmed_num}.feather"), pubmed_num=pubmed_all)
+        expand(os.path.join(output_dir, "data/pubmed/word-counts/batches/baseline/{pubmed_num}.feather"), pubmed_num=pubmed_all)
     output:
-        os.path.join(output_dir, "data/pubmed/word-stats/baseline.feather")
+        os.path.join(output_dir, "data/pubmed/word-counts/baseline.feather")
     script:
-        "scripts/combine_word_stats.py"
+        "scripts/combine_word_counts.py"
 
-rule combine_lemmatized_pubmed_word_stats:
+rule combine_lemmatized_pubmed_word_counts:
     input:
-        expand(os.path.join(output_dir, "data/pubmed/word-stats/batches/lemmatized/{pubmed_num}.feather"), pubmed_num=pubmed_all)
+        expand(os.path.join(output_dir, "data/pubmed/word-counts/batches/lemmatized/{pubmed_num}.feather"), pubmed_num=pubmed_all)
     output:
-        os.path.join(output_dir, "data/pubmed/word-stats/lemmatized.feather")
+        os.path.join(output_dir, "data/pubmed/word-counts/lemmatized.feather")
     script:
-        "scripts/combine_word_stats.py"
+        "scripts/combine_word_counts.py"
 
-rule compute_baseline_pubmed_word_stats:
+rule compute_baseline_pubmed_word_counts:
     input:
         os.path.join(input_dir, "pubmed/baseline/{pubmed_num}.feather")
     output:
-        os.path.join(output_dir, "data/pubmed/word-stats/batches/baseline/{pubmed_num}.feather")
+        os.path.join(output_dir, "data/pubmed/word-counts/batches/baseline/{pubmed_num}.feather")
     script:
-        "scripts/compute_word_stats.py"
+        "scripts/create_word_count_matrix.py"
 
-rule compute_lemmatized_pubmed_word_stats:
+rule compute_lemmatized_pubmed_word_counts:
     input:
         os.path.join(input_dir, "pubmed/lemmatized/{pubmed_num}.feather")
     output:
-        os.path.join(output_dir, "data/pubmed/word-stats/batches/lemmatized/{pubmed_num}.feather")
+        os.path.join(output_dir, "data/pubmed/word-counts/batches/lemmatized/{pubmed_num}.feather")
     script:
-        "scripts/compute_word_stats.py"
+        "scripts/create_word_count_matrix.py"
 
 # combine articles and sub-sample, if enabled
 rule combine_pubmed_articles:

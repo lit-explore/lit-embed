@@ -1,5 +1,41 @@
 import stanza
+import numpy as np
 from stanza.pipeline.core import ResourcesFileNotFoundError
+from scipy.stats import poisson
+
+def ridf(cf, df, N):
+    """
+    Computes the residual IDF (RIDF) of a given word.
+
+    RIDF is a measure of the "informativeness" of a word in a corpus of documents.
+
+    It uses a combination of IDF (which measures the _rareness_ of a word), and a
+    Poisson model of expected word frequency.
+
+    The Poisson model can be used to model the occurrence of common / non-content words.
+    RIDF uses this to its advantage, by considering the deviation of a words occurrences
+    from what is predicted by Poisson, in order to find words that are more
+    interesting/informative.
+
+    $$
+    \text{RIDF} = \text{IDF} - \log_2 \frac{1}{1 - p(0; \lambda_i)}
+    $$
+
+    Parameters
+    ----------
+    cf: float
+        the total number of occurrences of the word in the collection ("collection frequency")
+    df: int
+        the number of documents containing the word ("document frequency")
+    N: int
+        total number of documents
+
+    References
+    ----------
+    1. Manning, C., & Schutze, H. (1999). Foundations of Statistical Natural Language
+       Processing. MIT Press.
+    """
+    return np.log2(N / df) + np.log2(1 - poisson.pmf(0, cf / N))
 
 # source: gensim.parsing.preprocessing.STOPWORDS
 GENSIM_STOP_WORDS = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'again',
