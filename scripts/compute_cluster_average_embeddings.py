@@ -24,12 +24,5 @@ for cluster_id in cluster_ids:
 df = pd.DataFrame(rows)
 df.insert(0, "cluster_id", cluster_ids)
 
-df = df.set_index('cluster_id')
-
-# get a table of the most significant terms associated with each cluster
-summary_tbl = df.idxmax(axis=1).reset_index()
-summary_tbl.columns = ["cluster_id", "top_term"]
-
 # save results
-df.reset_index().to_feather(snakemake.output[0])
-summary_tbl.to_feather(snakemake.output[1])
+df.reset_index(drop=True).to_feather(snakemake.output[0])

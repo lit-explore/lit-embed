@@ -50,17 +50,25 @@ word_freq:
   alpha: 0.8
 
 tokenization:
-  min_length: 2
+  min_length: 3
 
-# clustering parameters (mini-batch kmeans)
+# maximum count contribution of a single article when computing moderated residual IDF
+# scores
+word_stats:
+  moderated_ridf_max_count: 5
+
+# clustering parameters
+#  articles: mini-batch k-means
+#  embedding_columns: agglomerative hclust
 clustering:
   articles:
     num_clusters: 20
     batch_size: 8192
-  topics:
-    num_clusters: 15
-    batch_size: 8192
-    max_articles: 100000
+  embedding_columns:
+    num_clusters: 20
+    linkage: 'average'
+    affinity: 'l1'
+    max_articles: 10000
 
 # t-SNE settings
 tsne:
@@ -68,7 +76,7 @@ tsne:
     num: 5000
     metric: 'cosine'
     perplexity: 30
-  topics:
+  embedding_columns:
     num: 5000
     metric: 'cosine'
     perplexity: 30
@@ -82,10 +90,10 @@ umap:
     n_neighbors: 25
     min_dist: 0.1
     metric: 'cosine'
-  topics:
+  embedding_columns:
     num: 10000
     densmap: true
-    n_neighbors: 25
+    n_neighbors: 20 
     min_dist: 0.1
     metric: 'cosine'
 
