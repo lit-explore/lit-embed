@@ -404,7 +404,7 @@ rule create_arxiv_scibert_embeddings:
         os.path.join(output_dir, "data/arxiv/scibert/mean/{arxiv_num}.feather"),
         os.path.join(output_dir, "data/arxiv/scibert/median/{arxiv_num}.feather"),
     script:
-        "scripts/create_biobert_embeddings.py"
+        "scripts/create_bert_embeddings.py"
 
 rule create_pubmed_biobert_embeddings:
     input:
@@ -414,7 +414,7 @@ rule create_pubmed_biobert_embeddings:
         os.path.join(output_dir, "data/pubmed/biobert/mean/{pubmed_num}.feather"),
         os.path.join(output_dir, "data/pubmed/biobert/median/{pubmed_num}.feather"),
     script:
-        "scripts/create_biobert_embeddings.py"
+        "scripts/create_bert_embeddings.py"
 
 rule create_lemmatized_arxiv_corpus:
     input:
