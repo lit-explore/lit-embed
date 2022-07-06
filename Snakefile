@@ -48,7 +48,9 @@ rule all:
         expand(os.path.join(output_dir, "fig/arxiv/{target}/{projection}/scibert-{agg_func}-scatterplot.png"), agg_func=agg_funcs, target=targets, projection=projection_types),
         expand(os.path.join(output_dir, "data/pubmed/comparison/biobert-{agg_func}-tfidf-{processing}.feather"), agg_func=agg_funcs, processing=processing_versions),
         expand(os.path.join(output_dir, "data/pubmed/word-stats/{processing}.feather"), processing=processing_versions),
-        expand(os.path.join(output_dir, "data/arxiv/word-stats/{processing}.feather"), processing=processing_versions)
+        expand(os.path.join(output_dir, "data/arxiv/word-stats/{processing}.feather"), processing=processing_versions),
+        expand(os.path.join(output_dir, "data/arxiv/mridf-{processing}.feather"), processing=processing_versions)
+        expand(os.path.join(output_dir, "data/pubmed/mridf-{processing}.feather"), processing=processing_versions)
 
 rule datashader:
     input:
@@ -266,6 +268,25 @@ rule combine_pubmed_lemmatized_articles:
         os.path.join(output_dir, "data/pubmed/articles-lemmatized.csv")
     script:
         "scripts/combine_articles.py"
+
+# compute modified RIDF matrices
+rule compute_arxiv_ridf_mat:
+    input:
+       os.path.join(output_dir, "data/arxiv/articles-{processing}.csv"),
+       os.path.join(output_dir, "data/arxiv/word-stats/{processing}.feather")
+    output:
+       os.path.join(output_dir, "data/arxiv/mridf-{processing}.feather")
+    script:
+        "scripts/compute_mridf_matrix.py"
+
+rule compute_pubmed_ridf_mat:
+    input:
+       os.path.join(output_dir, "data/pubmed/articles-{processing}.csv"),
+       os.path.join(output_dir, "data/pubmed/word-stats/{processing}.feather")
+    output:
+       os.path.join(output_dir, "data/pubmed/mridf-{processing}.feather")
+    script:
+        "scripts/compute_mridf_matrix.py"
 
 # arxiv word stats
 rule compute_arxiv_word_stats:
