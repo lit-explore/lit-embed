@@ -1,5 +1,5 @@
 """
-Science literature embedding pipeline
+lit-embed: Scientific literature embedding pipeline
 """
 import os
 import pandas as pd
@@ -40,6 +40,15 @@ agg_funcs = ['mean', 'median']
 projection_types = ['tsne', 'umap']
 targets = ['articles', 'embedding_columns']
 
+common_embeddings = ['tfidf-baseline', 'tfidf-lemmatized', 'mridf-baseline', 'mridf-lemmatized']
+pubmed_embeddings = common_embeddings + ['biobert-mean', 'biobert-median']
+arxiv_embeddings = common_embeddings + ['scibert-mean', 'scibert-median']
+
+#
+# DROP BERT AGG FUNCS? (Simplify..)
+#
+#
+
 rule all:
     input:
         expand(os.path.join(output_dir, "fig/{source}/{projection}/{target}/tfidf-{processing}-scatterplot.png"), source=data_sources, processing=processing_versions, target=targets, projection=projection_types),
@@ -48,15 +57,35 @@ rule all:
         expand(os.path.join(output_dir, "data/{source}/embeddings/cluster-mean-embeddings/tfidf-{processing}-mean-embedding.feather"), source=data_sources, processing=processing_versions),
         expand(os.path.join(output_dir, "data/pubmed/comparison/biobert-{agg_func}-tfidf-{processing}.feather"), agg_func=agg_funcs, processing=processing_versions),
         expand(os.path.join(output_dir, "data/pubmed/word-stats/{processing}.feather"), processing=processing_versions),
+        expand(os.path.join(output_dir, "data/pubmed/embeddings/mridf-{processing}.feather"), processing=processing_versions),
+        expand(os.path.join(output_dir, "data/pubmed/clusters/articles/associations/{embedding}-cluster-mridf-word-associations.feather"), embedding=pubmed_embeddings),
         expand(os.path.join(output_dir, "data/arxiv/word-stats/{processing}.feather"), processing=processing_versions),
         expand(os.path.join(output_dir, "data/arxiv/embeddings/mridf-{processing}.feather"), processing=processing_versions),
-        expand(os.path.join(output_dir, "data/pubmed/embeddings/mridf-{processing}.feather"), processing=processing_versions)
+        expand(os.path.join(output_dir, "data/arxiv/clusters/articles/associations/{embedding}-cluster-mridf-word-associations.feather"), embedding=arxiv_embeddings),
+        #expand(os.path.join(output_dir, "data/arxiv/clusters/articles/associations/{embedding}-cluster-associations.feather"), embedding=arxiv_embeddings)
+        #expand(os.path.join(output_dir, "data/pubmed/clusters/articles/associations/biobert-{agg_func}-cluster-mridf-word-associations.feather"),
 
 rule datashader:
     input:
         expand(os.path.join(output_dir, "fig/{source}/umap/articles/tfidf-{processing}-datashader.png"), source=data_sources, processing=processing_versions),
         expand(os.path.join(output_dir, "fig/pubmed/umap/articles/biobert-{agg_func}-datashader.png"), agg_func=agg_funcs),
         expand(os.path.join(output_dir, "fig/arxiv/umap/articles/scibert-{agg_func}-datashader.png"), agg_func=agg_funcs)
+
+rule compute_pubmed_embedding_cluster_word_associations:
+    input:
+       os.path.join(output_dir, "data/pubmed/embeddings/mridf-lemmatized.feather"),
+       os.path.join(output_dir, "data/pubmed/clusters/articles/{embedding}-clusters.feather"),
+    output:
+       os.path.join(output_dir, "data/pubmed/clusters/articles/associations/{embedding}-cluster-mridf-word-associations.feather")
+    script: "scripts/compute_cluster_embedding_associations.py"
+
+rule compute_arxiv_embedding_cluster_word_associations:
+    input:
+       os.path.join(output_dir, "data/arxiv/embeddings/mridf-lemmatized.feather"),
+       os.path.join(output_dir, "data/arxiv/clusters/articles/{embedding}-clusters.feather"),
+    output:
+       os.path.join(output_dir, "data/arxiv/clusters/articles/associations/{embedding}-cluster-mridf-word-associations.feather")
+    script: "scripts/compute_cluster_embedding_associations.py"
 
 rule compute_tfidf_cluster_average_embeddings:
     input:
@@ -153,7 +182,7 @@ rule plot_biobert_scatterplot:
     output:
         os.path.join(output_dir, "fig/pubmed/{projection}/{target}/biobert-{agg_func}-scatterplot.png"),
     params:
-        name="SciBERT"
+        name="BioBERT"
     script:
         "scripts/plot_scatter.py"
 
@@ -194,44 +223,58 @@ rule scibert_dimension_reduction:
 
 rule compute_tfidf_article_clusters:
     input:
-        os.path.join(output_dir, "data/{source}/tfidf-{processing}.feather"),
+        os.path.join(output_dir, "data/{source}/embeddings/tfidf-{processing}.feather"),
     output:
-        os.path.join(output_dir, "data/{source}/articles/tfidf-{processing}-clusters.feather"),
+        os.path.join(output_dir, "data/{source}/clusters/articles/tfidf-{processing}-clusters.feather"),
     script: "scripts/cluster_articles.py"
 
 rule compute_tfidf_embedding_column_clusters:
     input:
-        os.path.join(output_dir, "data/{source}/tfidf-{processing}.feather"),
+        os.path.join(output_dir, "data/{source}/embeddings/tfidf-{processing}.feather"),
     output:
-        os.path.join(output_dir, "data/{source}/topics/tfidf-{processing}-clusters.feather"),
+        os.path.join(output_dir, "data/{source}/clusters/embedding_columns/tfidf-{processing}-clusters.feather"),
+    script: "scripts/cluster_embedding_columns.py"
+
+rule compute_mridf_article_clusters:
+    input:
+        os.path.join(output_dir, "data/{source}/embeddings/mridf-{processing}.feather"),
+    output:
+        os.path.join(output_dir, "data/{source}/clusters/articles/mridf-{processing}-clusters.feather"),
+    script: "scripts/cluster_articles.py"
+
+rule compute_mridf_embedding_column_clusters:
+    input:
+        os.path.join(output_dir, "data/{source}/embeddings/mridf-{processing}.feather"),
+    output:
+        os.path.join(output_dir, "data/{source}/clusters/embedding_columns/mridf-{processing}-clusters.feather"),
     script: "scripts/cluster_embedding_columns.py"
 
 rule compute_biobert_embedding_article_clusters:
     input:
         os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather")
     output:
-        os.path.join(output_dir, "data/pubmed/articles/biobert-{agg_func}-clusters.feather"),
+        os.path.join(output_dir, "data/pubmed/clusters/articles/biobert-{agg_func}-clusters.feather"),
     script: "scripts/cluster_articles.py"
 
 rule compute_biobert_embedding_column_clusters:
     input:
         os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather")
     output:
-        os.path.join(output_dir, "data/pubmed/topics/biobert-{agg_func}-clusters.feather"),
+        os.path.join(output_dir, "data/pubmed/clusters/embedding_columns/biobert-{agg_func}-clusters.feather"),
     script: "scripts/cluster_embedding_columns.py"
 
 rule compute_scibert_embedding_article_clusters:
     input:
         os.path.join(output_dir, "data/arxiv/scibert-{agg_func}.feather")
     output:
-        os.path.join(output_dir, "data/arxiv/articles/scibert-{agg_func}-clusters.feather"),
+        os.path.join(output_dir, "data/arxiv/clusters/articles/scibert-{agg_func}-clusters.feather"),
     script: "scripts/cluster_articles.py"
 
 rule compute_scibert_embedding_column_clusters:
     input:
         os.path.join(output_dir, "data/arxiv/scibert-{agg_func}.feather")
     output:
-        os.path.join(output_dir, "data/arxiv/topics/scibert-{agg_func}-clusters.feather"),
+        os.path.join(output_dir, "data/arxiv/clusters/embedding_columns/scibert-{agg_func}-clusters.feather"),
     script: "scripts/cluster_embedding_columns.py"
 
 rule compute_tfidf_matrix:
@@ -369,16 +412,7 @@ rule compute_lemmatized_pubmed_word_counts:
     script:
         "scripts/create_word_count_matrix.py"
 
-# combine articles and sub-sample, if enabled
-rule combine_pubmed_articles:
-    input:
-        expand(os.path.join(input_dir, "pubmed/baseline/{pubmed_num}.feather"), pubmed_num=pubmed_all)
-    output:
-        os.path.join(output_dir, "data/pubmed/corpus/articles-baseline.csv")
-    script:
-        "scripts/combine_articles.py"
-
-rule combine_arxiv_embeddings:
+rule combine_arxiv_scibert_embeddings:
     input:
         expand(os.path.join(output_dir,
             "data/arxiv/scibert/{{agg_func}}/{arxiv_num}.feather"), arxiv_num=arxiv_num),
@@ -387,7 +421,7 @@ rule combine_arxiv_embeddings:
     script:
         "scripts/combine_embeddings.py"
 
-rule combine_pubmed_embeddings:
+rule combine_pubmed_biobert_embeddings:
     input:
         expand(os.path.join(output_dir, "data/pubmed/embeddings/biobert/{{agg_func}}/{pubmed_num}.feather"), pubmed_num=pubmed_all),
     output:
@@ -414,6 +448,14 @@ rule create_pubmed_biobert_embeddings:
         os.path.join(output_dir, "data/pubmed/embeddings/biobert/median/{pubmed_num}.feather"),
     script:
         "scripts/create_bert_embeddings.py"
+
+rule combine_pubmed_articles:
+    input:
+        expand(os.path.join(input_dir, "pubmed/baseline/{pubmed_num}.feather"), pubmed_num=pubmed_all)
+    output:
+        os.path.join(output_dir, "data/pubmed/corpus/articles-baseline.csv")
+    script:
+        "scripts/combine_articles.py"
 
 rule create_lemmatized_arxiv_corpus:
     input:
