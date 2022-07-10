@@ -36,13 +36,13 @@ else:
 # wildcard values
 data_sources = ['pubmed', 'arxiv']
 processing_versions = ['baseline', 'lemmatized']
-agg_funcs = ['mean', 'median']
+agg_funcs = ['mean', 'median', 'max']
 projection_types = ['tsne', 'umap']
 targets = ['articles', 'embedding_columns']
 
 common_embeddings = ['tfidf-baseline', 'tfidf-lemmatized', 'mridf-baseline', 'mridf-lemmatized']
-pubmed_embeddings = common_embeddings + ['biobert-mean', 'biobert-median']
-arxiv_embeddings = common_embeddings + ['scibert-mean', 'scibert-median']
+pubmed_embeddings = common_embeddings + ['biobert-mean', 'biobert-median', 'biobert-mean', 'biobert-max']
+arxiv_embeddings = common_embeddings + ['scibert-mean', 'scibert-median', 'scibert-max']
 
 #
 # DROP BERT AGG FUNCS? (Simplify..)
@@ -98,7 +98,7 @@ rule compute_tfidf_cluster_average_embeddings:
 
 rule compute_embedding_correlation:
     input:
-        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather"),
+        os.path.join(output_dir, "data/pubmed/embeddings/biobert-{agg_func}.feather"),
         os.path.join(output_dir, "data/pubmed/embeddings/tfidf-{processing}.feather")
     output:
         os.path.join(output_dir, "data/pubmed/comparison/biobert-{agg_func}-tfidf-{processing}.feather")
@@ -199,7 +199,7 @@ rule plot_scibert_scatterplot:
 
 rule tfidf_dimension_reduction:
     input:
-        os.path.join(output_dir, "data/{source}/tfidf-{processing}.feather"),
+        os.path.join(output_dir, "data/{source}/embeddings/tfidf-{processing}.feather"),
     output:
         os.path.join(output_dir, "data/{source}/projections/{projection}/{target}/tfidf-{processing}.feather"),
     script:
@@ -207,7 +207,7 @@ rule tfidf_dimension_reduction:
 
 rule biobert_dimension_reduction:
     input:
-        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather")
+        os.path.join(output_dir, "data/pubmed/embeddings/biobert-{agg_func}.feather")
     output:
         os.path.join(output_dir, "data/pubmed/projections/{projection}/{target}/biobert-{agg_func}.feather"),
     script:
@@ -215,7 +215,7 @@ rule biobert_dimension_reduction:
 
 rule scibert_dimension_reduction:
     input:
-        os.path.join(output_dir, "data/arxiv/scibert-{agg_func}.feather")
+        os.path.join(output_dir, "data/arxiv/embeddings/scibert-{agg_func}.feather")
     output:
         os.path.join(output_dir, "data/arxiv/projections/{projection}/{target}/scibert-{agg_func}.feather"),
     script:
@@ -251,28 +251,28 @@ rule compute_mridf_embedding_column_clusters:
 
 rule compute_biobert_embedding_article_clusters:
     input:
-        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather")
+        os.path.join(output_dir, "data/pubmed/embeddings/biobert-{agg_func}.feather")
     output:
         os.path.join(output_dir, "data/pubmed/clusters/articles/biobert-{agg_func}-clusters.feather"),
     script: "scripts/cluster_articles.py"
 
 rule compute_biobert_embedding_column_clusters:
     input:
-        os.path.join(output_dir, "data/pubmed/biobert-{agg_func}.feather")
+        os.path.join(output_dir, "data/pubmed/embeddings/biobert-{agg_func}.feather")
     output:
         os.path.join(output_dir, "data/pubmed/clusters/embedding_columns/biobert-{agg_func}-clusters.feather"),
     script: "scripts/cluster_embedding_columns.py"
 
 rule compute_scibert_embedding_article_clusters:
     input:
-        os.path.join(output_dir, "data/arxiv/scibert-{agg_func}.feather")
+        os.path.join(output_dir, "data/arxiv/embeddings/scibert-{agg_func}.feather")
     output:
         os.path.join(output_dir, "data/arxiv/clusters/articles/scibert-{agg_func}-clusters.feather"),
     script: "scripts/cluster_articles.py"
 
 rule compute_scibert_embedding_column_clusters:
     input:
-        os.path.join(output_dir, "data/arxiv/scibert-{agg_func}.feather")
+        os.path.join(output_dir, "data/arxiv/embeddings/scibert-{agg_func}.feather")
     output:
         os.path.join(output_dir, "data/arxiv/clusters/embedding_columns/scibert-{agg_func}-clusters.feather"),
     script: "scripts/cluster_embedding_columns.py"
@@ -436,6 +436,7 @@ rule create_arxiv_scibert_embeddings:
     output:
         os.path.join(output_dir, "data/arxiv/scibert/mean/{arxiv_num}.feather"),
         os.path.join(output_dir, "data/arxiv/scibert/median/{arxiv_num}.feather"),
+        os.path.join(output_dir, "data/arxiv/scibert/max/{arxiv_num}.feather")
     script:
         "scripts/create_bert_embeddings.py"
 
@@ -446,6 +447,7 @@ rule create_pubmed_biobert_embeddings:
     output:
         os.path.join(output_dir, "data/pubmed/embeddings/biobert/mean/{pubmed_num}.feather"),
         os.path.join(output_dir, "data/pubmed/embeddings/biobert/median/{pubmed_num}.feather"),
+        os.path.join(output_dir, "data/pubmed/embeddings/biobert/max/{pubmed_num}.feather")
     script:
         "scripts/create_bert_embeddings.py"
 

@@ -9,6 +9,9 @@ from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModel
 
 model_dir = os.path.dirname(snakemake.input[1])
+
+# create BERT tokenizer
+# https://huggingface.co/docs/transformers/v4.20.1/en/model_doc/bert#transformers.BertTokenizer
 tokenizer = AutoTokenizer.from_pretrained(model_dir)
 
 # instantiate language model
@@ -33,6 +36,7 @@ dat.abstract.fillna("", inplace=True)
 
 ids = dat.id.values
 
+# combine title & abstract for each article to construct corpus
 corpus = []
 
 for ind, article in dat.iterrows():
@@ -43,20 +47,25 @@ for ind, article in dat.iterrows():
 # iterate over articles, and create embeddings
 mean_embeddings = []
 median_embeddings = []
+max_embeddings = []
 
 with torch.no_grad():
     for doc in tqdm(corpus):
-        # tokenize article title + abstract
+        # tokenize article title + abstract; 
+        # in cases where > 512 tokens are present, just use the first 512 for now..
         tokens = tokenizer.tokenize(doc)
         tokens = tokenizer.encode(tokens, is_split_into_words=True)[:512]
         
         # create embedding and store
         token_tensor = torch.tensor(tokens, dtype=torch.long)
+
+        # "token_embeddings" = 1 x <num_tokens> x <embedding_dim>
         token_embeddings, abs_embedding = model(token_tensor[None,:].cuda()).to_tuple()
         
         # compute article embedding as the mean of its word embeddings
         mean_embeddings.append(token_embeddings.mean(1)[0].detach().cpu().numpy())
         median_embeddings.append(token_embeddings.median(1)[0].detach().cpu().numpy())
+        max_embeddings.append(token_embeddings.max(1)[0].detach().cpu().numpy())
 
 # store embeddings
 mean_df = pd.DataFrame(np.vstack(mean_embeddings), index=pd.Series(ids, name='article_id'))
@@ -68,3 +77,8 @@ median_df = pd.DataFrame(np.vstack(median_embeddings), index=pd.Series(ids, name
 median_df.columns = [f"dim_{i}" for i in median_df.columns]
 
 median_df.reset_index().to_feather(snakemake.output[1])
+
+max_df = pd.DataFrame(np.vstack(max_embeddings), index=pd.Series(ids, name='article_id'))
+max_df.columns = [f"dim_{i}" for i in max_df.columns]
+
+max_df.reset_index().to_feather(snakemake.output[2])
