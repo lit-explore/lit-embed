@@ -49,7 +49,14 @@ else:
     source = 'Pubmed'
     processing = snakemake.wildcards['agg_func']
 
-name = snakemake.params['name']
+if os.path.basename(snakemake.input[0]).startswith("bert"):
+    if source == "Pubmed":
+        name = "BioBERT"
+    else:
+        name = "SciBERT"
+else:
+    name = "?"
+
 projection = snakemake.wildcards['projection']
 
 plt_title = f"{source} {target.capitalize()} {name} {projection} ({processing}, n={num_items})"
