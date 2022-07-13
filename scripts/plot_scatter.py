@@ -1,6 +1,7 @@
 """
 Generates a scatterplot using seaborn
 """
+import os
 import random
 import pandas as pd
 import seaborn as sns

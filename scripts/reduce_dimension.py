@@ -23,8 +23,9 @@ if target == "articles":
         dat = dat.iloc[ind, :]
 else:
     # subsample topics?
-    if snakemake.config[dim_method]['topics']['num'] < dat.shape[1]:
-        ind = random.sample(range(dat.shape[1]), snakemake.config[dim_method]['topics']['num'])
+    if snakemake.config[dim_method]['embedding_columns']['num'] < dat.shape[1]:
+        ind = random.sample(range(dat.shape[1]),
+                snakemake.config[dim_method]['embedding_columns']['num'])
         dat = dat.iloc[:, ind]
 
 # remove any articles with zero variance (done for both article/topic projections);
@@ -52,9 +53,9 @@ elif dim_method == 'tsne':
                 random_state=snakemake.config['random_seed'])
 
     # for t-sne + topics, limit number of articles to avoid running out of memory
-    if target == 'topics':
+    if target == 'embedding_columns':
 
-        max_articles = snakemake.config[dim_method]['topics']['max_articles']
+        max_articles = snakemake.config[dim_method]['embedding_columns']['max_articles']
 
         if max_articles < dat.shape[0]:
             ind = random.sample(range(dat.shape[0]), max_articles)
