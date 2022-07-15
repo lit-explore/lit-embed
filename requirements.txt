@@ -1,6 +1,5 @@
 python>=3.9
 cudatoolkit
-gensim
 kaggle
 matplotlib
 numpy

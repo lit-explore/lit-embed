@@ -29,7 +29,11 @@ downstream:
 3. [ ] compute IDF, etc. for filtered "candidate" words?
 """
 import pandas as pd
-from gensim.utils import tokenize
+import re
+
+# match all alphanumeric tokens;
+# originally used gensim.utils.tokenize, but it strips numbers (e.g. "NUF2" -> "NUF")
+regex = re.compile(r"[\w\d]+", re.UNICODE)
 
 dat = pd.read_feather(snakemake.input[0]).set_index('id')
 
@@ -42,8 +46,8 @@ for article_id, article in dat.iterrows():
 
     # generate tokens for title & abstract;
     # texts are first converted to lowercase (already the case for lemmatized input)
-    title_parts = list(tokenize(article.title.lower()))
-    abstract_parts = list(tokenize(article.abstract.lower()))
+    title_parts = [match.group() for match in regex.finditer(note.title.lower())]
+    body_parts = [match.group() for match in regex.finditer(note.body.lower())]
 
     # compute counts of each word, for each section
     title_counts = pd.Series(title_parts).value_counts()
