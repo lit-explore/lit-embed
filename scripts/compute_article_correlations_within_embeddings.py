@@ -18,4 +18,5 @@ embed_mat = embed_mat.sample(random_state = rng)
 
 cor_mat = embed_mat.T.corr()
 
-cor_mat.reset_index().rename(columns={"index": "article_id"}).to_feather(snakemake.output[0])
+cor_mat = cor_mat.reset_index()
+cor_mat.rename(columns={cor_mat.columns[0]: "article_id"}).to_feather(snakemake.output[0])

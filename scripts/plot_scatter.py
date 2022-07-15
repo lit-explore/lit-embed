@@ -17,18 +17,21 @@ sns.set(rc={
 })
 
 # load data
-target = snakemake.wildcards['target']
+target = snakemake.wildcards.target
 
 if target == 'articles':
     index = 'article_id'
 else:
-    index = 'topic'
+    index = 'embedding_column'
 
 # add cluster assignments
-dat = pd.read_feather(snakemake.input[0]).set_index(index)
-clusters = pd.read_feather(snakemake.input[1]).set_index(index)
+try:
+    dat = pd.read_feather(snakemake.input[0]).set_index(index)
+    clusters = pd.read_feather(snakemake.input[1]).set_index(index)
 
-dat['cluster'] = clusters.loc[dat.index].cluster
+    dat['cluster'] = clusters.loc[dat.index].cluster
+except:
+    breakpoint()
 
 # subsample data
 max_points = snakemake.config['plots']['scatterplot']['max_points']
@@ -39,24 +42,27 @@ if max_points < dat.shape[0]:
 
 num_items = dat.shape[0]
 
-# determine plot title to use
-if "source" in snakemake.wildcards.keys():
-    if snakemake.wildcards['source'] == 'arxiv':
-        source = 'arXiv'
-    else:
-        source = 'Pubmed'
-    processing = snakemake.wildcards['processing']
+# data source?
+if snakemake.wildcards.source == 'arxiv':
+    source = 'arXiv'
 else:
-    source = 'Pubmed'
-    processing = snakemake.wildcards['agg_func']
+    source = 'PubMed'
 
+# determine plot title to use
 if os.path.basename(snakemake.input[0]).startswith("bert"):
-    if source == "Pubmed":
+    if snakemake.wildcards.source == 'pubmed':
         name = "BioBERT"
     else:
         name = "SciBERT"
+elif "idf_type" in snakemake.wildcards.keys():
+    name = snakemake.wildcards.idf_type
 else:
     name = "?"
+
+if "processing" in snakemake.wildcards.keys():
+    processing = snakemake.wildcards.processing
+else:
+    processing = snakemake.wildcards.agg_func
 
 projection = snakemake.wildcards['projection']
 

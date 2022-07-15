@@ -12,7 +12,7 @@ random.seed(snakemake.config['random_seed'])
 # load data
 dat = pd.read_feather(snakemake.input[0]).set_index('article_id')
 
-# determine orientation of projection (articles/topics)
+# determine orientation of projection (articles/embedding_columns)
 target = snakemake.wildcards['target']
 dim_method = snakemake.wildcards['projection']
 
@@ -22,13 +22,13 @@ if target == "articles":
         ind = random.sample(range(dat.shape[0]), snakemake.config[dim_method]['articles']['num'])
         dat = dat.iloc[ind, :]
 else:
-    # subsample topics?
+    # subsample embedding columns?
     if snakemake.config[dim_method]['embedding_columns']['num'] < dat.shape[1]:
         ind = random.sample(range(dat.shape[1]),
                 snakemake.config[dim_method]['embedding_columns']['num'])
         dat = dat.iloc[:, ind]
 
-# remove any articles with zero variance (done for both article/topic projections);
+# remove any articles with zero variance (done for both article/embedding column projections);
 mask = dat.apply(np.var, axis=1) > 0
 
 num_zero_var = dat.shape[0] - mask.sum()
@@ -48,11 +48,11 @@ if dim_method == 'umap':
     )
 elif dim_method == 'tsne':
     reducer = TSNE(n_components=2, perplexity=snakemake.config['tsne']['articles']['perplexity'], init='random', 
-                metric=snakemake.config['tsne']['articles']['metric'],
-                n_jobs=-1, learning_rate='auto', square_distances=True,
-                random_state=snakemake.config['random_seed'])
+                   metric=snakemake.config['tsne']['articles']['metric'],
+                   n_jobs=-1, learning_rate='auto',
+                   random_state=snakemake.config['random_seed'])
 
-    # for t-sne + topics, limit number of articles to avoid running out of memory
+    # for t-sne + embedding columns, limit number of articles to avoid running out of memory
     if target == 'embedding_columns':
 
         max_articles = snakemake.config[dim_method]['embedding_columns']['max_articles']
@@ -68,11 +68,13 @@ if target == "articles":
 else: 
     embedding = reducer.fit_transform(dat.T)
     embedding_index = dat.columns
-    index_name = "topic"
+    index_name = "embedding_column"
 
 # store result
 colnames = [dim_method.upper() + str(i) for i in range(1, 3)]
 
 df = pd.DataFrame(embedding, columns=colnames, index=embedding_index)
-df.reset_index().rename(columns={"index": index_name}).to_feather(snakemake.output[0])
+
+df = df.reset_index()
+df.rename(columns={df.columns[0]: index_name}).to_feather(snakemake.output[0])
 
