@@ -7,10 +7,10 @@ import pandas as pd
 import scipy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import MinMaxScaler
-from util.nlp import STOP_WORDS, STOP_WORDS_LEMMA
+from util.nlp import get_stop_words
 
-# determine version of stop words to use
-stop_words = STOP_WORDS if snakemake.wildcards['processing'] == 'baseline' else STOP_WORDS_LEMMA
+# get stop words list
+stop_words = get_stop_words(snakemake.wildcards['processing'] == 'lemmatized')
 
 # load articles
 dtypes = {'id': 'str', 'doi': 'str', 'title': 'str', 'abstract': 'str', 'date': 'str'}

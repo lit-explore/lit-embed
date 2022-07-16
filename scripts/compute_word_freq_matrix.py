@@ -5,10 +5,10 @@ import ujson
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
-from util.nlp import STOP_WORDS, STOP_WORDS_LEMMA
+from util.nlp import get_stop_words
 
-# determine version of stop words to use
-stop_words = STOP_WORDS if snakemake.wildcards['processing'] == 'baseline' else STOP_WORDS_LEMMA
+# get stop words lsit
+stop_words = get_stop_words(snakemake.wildcards['processing'] == 'lemmatized')
 
 # load articles
 dat = pd.read_csv(snakemake.input[0])

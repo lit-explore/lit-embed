@@ -50,8 +50,8 @@ for article_id, article in dat.iterrows():
     abstract_parts = [match.group() for match in regex.finditer(article.abstract.lower())]
 
     # compute counts of each word, for each section
-    title_counts = pd.Series(title_parts).value_counts()
-    abstract_counts = pd.Series(abstract_parts).value_counts()
+    title_counts = pd.Series(title_parts, dtype=str).value_counts()
+    abstract_counts = pd.Series(abstract_parts, dtype=str).value_counts()
 
     # get a list of all tokens which appear in either title/abstract
     all_tokens = sorted(list(set(title_parts + abstract_parts)))
