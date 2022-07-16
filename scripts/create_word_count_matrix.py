@@ -46,8 +46,8 @@ for article_id, article in dat.iterrows():
 
     # generate tokens for title & abstract;
     # texts are first converted to lowercase (already the case for lemmatized input)
-    title_parts = [match.group() for match in regex.finditer(note.title.lower())]
-    body_parts = [match.group() for match in regex.finditer(note.body.lower())]
+    title_parts = [match.group() for match in regex.finditer(article.title.lower())]
+    abstract_parts = [match.group() for match in regex.finditer(article.abstract.lower())]
 
     # compute counts of each word, for each section
     title_counts = pd.Series(title_parts).value_counts()

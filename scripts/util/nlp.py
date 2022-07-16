@@ -38,6 +38,7 @@ def ridf(cf, df, N):
     return np.log2(N / df) + np.log2(1 - poisson.pmf(0, cf / N))
 
 # source: gensim.parsing.preprocessing.STOPWORDS
+# modified to remove some words which may be useful (subjective..): "fire", "system"
 GENSIM_STOP_WORDS = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'again',
         'against', 'all', 'almost', 'alone', 'along', 'already', 'also', 'although',
         'always', 'am', 'among', 'amongst', 'amoungst', 'amount', 'an', 'and',
@@ -45,14 +46,14 @@ GENSIM_STOP_WORDS = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'ag
         'around', 'as', 'at', 'back', 'be', 'became', 'because', 'become', 'becomes',
         'becoming', 'been', 'before', 'beforehand', 'behind', 'being', 'below',
         'beside', 'besides', 'between', 'beyond', 'bill', 'both', 'bottom', 'but', 'by',
-        'call', 'can', 'cannot', 'cant', 'co', 'computer', 'con', 'corrigendum', 'could', 'couldnt',
+        'call', 'can', 'cannot', 'cant', 'co', 'computer', 'con', 'could', 'couldnt',
         'cry', 'de', 'describe', 'detail', 'did', 'didn', 'do', 'does', 'doesn',
         'doing', 'don', 'done', 'down', 'due', 'during', 'each', 'eg', 'eight',
         'either', 'eleven', 'else', 'elsewhere', 'empty', 'enough', 'etc', 'even',
         'ever', 'every', 'everyone', 'everything', 'everywhere', 'except', 'few',
-        'fifteen', 'fifty', 'fill', 'find', 'fire', 'first', 'five', 'for', 'former',
+        'fifteen', 'fifty', 'fill', 'find', 'first', 'five', 'for', 'former',
         'formerly', 'forty', 'found', 'four', 'from', 'front', 'full', 'further', 'get',
-        'give', 'go', 'had', 'has', 'hasnt', 'have', 'he', 'healthy', 'hence', 'her', 'here',
+        'give', 'go', 'had', 'has', 'hasnt', 'have', 'he', 'hence', 'her', 'here',
         'hereafter', 'hereby', 'herein', 'hereupon', 'hers', 'herself', 'him',
         'himself', 'his', 'how', 'however', 'hundred', 'i', 'ie', 'if', 'in', 'inc',
         'indeed', 'interest', 'into', 'is', 'it', 'its', 'itself', 'just', 'keep', 'kg',
@@ -67,7 +68,7 @@ GENSIM_STOP_WORDS = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'ag
         'seem', 'seemed', 'seeming', 'seems', 'serious', 'several', 'she', 'should',
         'show', 'side', 'since', 'sincere', 'six', 'sixty', 'so', 'some', 'somehow',
         'someone', 'something', 'sometime', 'sometimes', 'somewhere', 'still', 'such',
-        'system', 'take', 'ten', 'than', 'that', 'the', 'their', 'them', 'themselves',
+        'take', 'ten', 'than', 'that', 'the', 'their', 'them', 'themselves',
         'then', 'thence', 'there', 'thereafter', 'thereby', 'therefore', 'therein',
         'thereupon', 'these', 'they', 'thick', 'thin', 'third', 'this', 'those',
         'though', 'three', 'through', 'throughout', 'thru', 'thus', 'to', 'together',
@@ -79,26 +80,31 @@ GENSIM_STOP_WORDS = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'ag
         'whom', 'whose', 'why', 'will', 'with', 'within', 'without', 'would', 'yet',
         'you', 'your', 'yours', 'yourself', 'yourselves']
 
-# add common numbers
+# add single letters and digits
+STOP_WORDS = STOP_WORDS + list(string.digits)
+STOP_WORDS = STOP_WORDS + list(string.ascii_lowercase)
+
+# add common two-digit numbers
 STOP_WORDS = GENSIM_STOP_WORDS + [f"{x:02}" for x in range(20)]
 
-# add other words of questionable informativeness
-STOP_WORDS = STOP_WORDS + ['affect', 'aim', 'analysis', 'applications', 'approach',
-        'article', 'assess', 'associated', 'based', 'case', 'compared', 'consider',
-        'current', 'data', 'design', 'demonstrate', 'determine', 'different', 'discuss',
-        'effect', 'effective', 'effects', 'equation', 'equations', 'erratum',
-        'evidence', 'evaluate', 'examined', 'experience', 'findings', 'following',
-        'function', 'functions', 'given', 'identified', 'important', 'including',
-        'induced', 'investigate', 'investigated', 'key', 'known', 'large', 'like',
-        'mathbb', 'mathcal', 'mathrm', 'method', 'methods', 'model', 'models', 'need',
-        'new', 'non', 'novel', 'observed', 'obtain', 'obtained', 'outcome', 'paper',
-        'parameter', 'parameters', 'particular', 'performance', 'performed', 'possible',
-        'presence', 'present', 'problem', 'problems', 'properties', 'propose',
-        'proposed', 'prove', 'provide', 'range', 'recent', 'related', 'relationship',
-        'research', 'respectively', 'report', 'result', 'results', 'revealed', 'review', 'role',
-        'set', 'showed', 'shown', 'significant', 'significantly', 'solution',
-        'solutions', 'strategy', 'studies', 'study', 'technique', 'term', 'terms',
-        'test', 'theory', 'type', 'use', 'values', 'work', 'year']
+STOP_WORDS = STOP_WORDS + ['add', 'affect', 'aim', 'analysis', 'applications',
+        'approach', 'article', 'assess', 'associated', 'based', 'case', 'com',
+        'compared', 'consider', 'corrigendum', 'current', 'data', 'demonstrate',
+        'design', 'determine', 'different', 'discuss', 'effect', 'effective', 'effects',
+        'equation', 'equations', 'erratum', 'evaluate', 'evidence', 'examined',
+        'experience', 'findings', 'following', 'function', 'functions', 'given',
+        'healthy', 'http', 'https', 'identified', 'important', 'including', 'induced',
+        'investigate', 'investigated', 'key', 'known', 'large', 'like', 'mathbb',
+        'mathcal', 'mathrm', 'method', 'methods', 'model', 'models', 'need', 'new',
+        'non', 'novel', 'observed', 'obtain', 'obtained', 'org', 'outcome', 'overview',
+        'paper', 'parameter', 'parameters', 'particular', 'performance', 'performed',
+        'possible', 'presence', 'present', 'problem', 'problems', 'properties',
+        'propose', 'proposed', 'prove', 'provide', 'range', 'recent', 'related',
+        'relationship', 'report', 'research', 'respectively', 'result', 'results',
+        'revealed', 'review', 'role', 'set', 'showed', 'shown', 'significant',
+        'significantly', 'solution', 'solutions', 'strategy', 'studies', 'study',
+        'technique', 'term', 'terms', 'test', 'theory', 'thing', 'try', 'type', 'use',
+        'value', 'values', 'way', 'work', 'www', 'year']
 
 # create lemmatized version of stopwords
 try:
