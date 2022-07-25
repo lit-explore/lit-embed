@@ -55,7 +55,7 @@ for index, row in dat.iterrows():
 del dat
 
 # default token pattern, modifed to account for minimum token length
-token_pattern = r"(?u)\b\w{" + str(min_length) + r",}\b"
+token_pattern = r"(?u)\b[a-zA-Z0-9]{" + str(min_length) + r",}\b"
 
 # count vocab words
 vectorizer = CountVectorizer(max_df=snakemake.config['word_freq']['max_df'],

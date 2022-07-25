@@ -39,7 +39,7 @@ del dat
 
 # default token pattern, modifed to account for minimum token lengths
 min_length = snakemake.config['tokenization']['min_length']
-token_pattern = r"(?u)\b\w{" + str(min_length) + r",}\b"
+token_pattern = r"(?u)\b[a-zA-Z0-9]{" + str(min_length) + r",}\b"
 
 # get tf-idf sparse matrix
 #  max_features=snakemake.config['word_freq']['max_features'],
