@@ -1,5 +1,5 @@
 """
-Parses Pubmed XML data and extract article id, title, and abstract information
+Parses Pubmed XML data and extract article pmid, title, and abstract information
 """
 import gzip
 import xml.etree.ElementTree as ET
@@ -11,7 +11,7 @@ with gzip.open(snakemake.input[0], "r") as fp:
 
 root = tree.getroot()
 
-ids = []
+pmids = []
 dois = []
 dates = []
 titles = []
@@ -41,11 +41,11 @@ for article in root.findall(".//PubmedArticle"):
     if snakemake.config['exclude_articles']['missing_abstract'] and abstract == "":
         continue
 
-    # extract id/doi
-    id = article.find(".//ArticleId[@IdType='pubmed']").text
+    # extract pmid/doi
+    pmid = article.find(".//ArticleId[@IdType='pubmed']").text
 
     doi_elem = article.find(".//ArticleId[@IdType='doi']")
-    doi = "" if doi_elem is None else doi_elem.text;
+    doi = "" if doi_elem is None else doi_elem.text.lower();
 
     try:
         date_elem = article.find(".//PubDate")
@@ -67,13 +67,13 @@ for article in root.findall(".//PubmedArticle"):
         # if date parsing fails, just leave field blank
         date_str = ""
 
-    ids.append(id)
+    pmids.append(pmid)
     dois.append(doi)
     titles.append(title)
     abstracts.append(abstract)
     dates.append(date_str)
 
-dat = pd.DataFrame({"id": ids, "doi": dois, "title": titles, "abstract": abstracts, "date": dates})
+dat = pd.DataFrame({"id": pmids, "doi": dois, "title": titles, "abstract": abstracts, "date": dates})
 
 if dat.shape[0] == 0:
     raise Exception("No articles found with all require components!")

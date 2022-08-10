@@ -46,7 +46,7 @@ for line in lines:
     date_str = datetime.strptime(date_created, "%d %b %Y %H:%M:%S %Z").isoformat()
 
     ids.append(article['id'])
-    dois.append(article['doi'])
+    dois.append(article['doi'].lower())
     titles.append(title)
     dates.append(date_str)
 
