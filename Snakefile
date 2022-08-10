@@ -1,5 +1,19 @@
 """
 lit-embed: Scientific literature embedding pipeline
+
+TODO (July 27; after pipeline run finishes..)
+- [ ] modify tf-idf normalization so that contributions from IDF/TF-IDF both some to
+  "1", prior to weighting; can drop min-max scaling currently used...
+- [ ] future: disable non-lemmatized text processing for tf-idf/mr-idf, by default
+  (slow/doesn't seem too interesting..)
+- [ ] manually exclude words that don't match token pattern prior to generating "vocab":
+
+import re
+...
+
+# word_stats.token? or .index?
+mask = [bool(re.match(token_pattern, x)) for x in word_stats.token]
+word_stats = word_stats.loc[mask, :]
 """
 import os
 import pandas as pd
@@ -52,9 +66,9 @@ rule all:
         expand(join(output_dir, "data/{source}/embeddings/bert-{agg_func}.feather"), source=data_sources, agg_func=agg_funcs),
 
         # correlation matrices
-        expand(join(output_dir, "data/{source}/correlation/articles/bert-{agg_func}.feather"), source=data_sources, agg_func=agg_funcs),
-        expand(join(output_dir, "data/{source}/correlation/articles/{idf_type}-{processing}.feather"), source=data_sources, idf_type=idf_types, processing=proc_levels),
-        expand(join(output_dir, "data/{source}/correlation/embedding_columns/{idf_type}-{processing}-bert-{agg_func}.feather"), source=data_sources, idf_type=idf_types, processing=proc_levels, agg_func=agg_funcs),
+        # expand(join(output_dir, "data/{source}/correlation/articles/bert-{agg_func}.feather"), source=data_sources, agg_func=agg_funcs),
+        # expand(join(output_dir, "data/{source}/correlation/articles/{idf_type}-{processing}.feather"), source=data_sources, idf_type=idf_types, processing=proc_levels),
+        # expand(join(output_dir, "data/{source}/correlation/embedding_columns/{idf_type}-{processing}-bert-{agg_func}.feather"), source=data_sources, idf_type=idf_types, processing=proc_levels, agg_func=agg_funcs),
 
         # word stats
         expand(join(output_dir, "data/{source}/word-stats/{processing}.feather"), source=data_sources, processing=proc_levels),
@@ -66,6 +80,11 @@ rule all:
         # plots
         expand(join(output_dir, "fig/{source}/{projection}/{target}/{idf_type}-{processing}-scatterplot.png"), source=data_sources, idf_type=idf_types, processing=proc_levels, target=targets, projection=projection_types),
         expand(join(output_dir, "fig/{source}/{projection}/{target}/bert-{agg_func}-scatterplot.png"), source=data_sources, projection=projection_types, target=targets, agg_func=agg_funcs),
+
+        # co-citation
+        join(output_dir, "data/pubmed/citations/citations.feather"),
+        join(output_dir, "data/pubmed/citations/citations-stats.feather"),
+        join(output_dir, "data/pubmed/citations/citations-filtering-stats.feather")
 
 rule datashader:
     input:
@@ -121,6 +140,19 @@ rule compute_idf_embedding_article_correlations:
         join(output_dir, "data/{source}/correlation/articles/{idf_type}-{processing}.feather")
     script:
         "scripts/compute_article_correlations_within_embeddings.py"
+
+#
+# - N random sets of K articles?
+# - N random sets of K articles, limited to most recent year?
+# - Random subset by topics? (e.g. 'myeloma'?)
+#
+rule create_pubmed_test_sets:
+    input:
+        join(output_dir, "data/pubmed/corpus/articles-baseline.csv")
+    output:
+        join(output_dir, "data/pubmed/test/xx.csv")
+    script:
+        "scripts/create_pubmed_test_sets.py"
 
 rule plot_idf_datashader:
     input:
@@ -421,6 +453,26 @@ rule download_biobert:
         git lfs install
         git clone https://huggingface.co/dmis-lab/biobert-v1.1
         """
+
+rule combine_pubmed_citations:
+    input:
+        citations=expand(join(input_dir, "pubmed/citations/{pubmed_num}.feather"), pubmed_num=pubmed_all),
+        stats=expand(join(input_dir, "pubmed/citations/{pubmed_num}_stats.feather"), pubmed_num=pubmed_all)
+    output:
+        join(output_dir, "data/pubmed/citations/citations.feather"),
+        join(output_dir, "data/pubmed/citations/citations-stats.feather"),
+        join(output_dir, "data/pubmed/citations/citations-filtering-stats.feather")
+    script:
+        "scripts/combine_pubmed_citations.py"
+
+rule extract_pubmed_citations:
+    input:
+        join(input_dir, "pubmed/raw/pubmed22n{pubmed_num}.xml.gz")
+    output:
+        join(input_dir, "pubmed/citations/{pubmed_num}.feather"),
+        join(input_dir, "pubmed/citations/{pubmed_num}_stats.feather")
+    script:
+        "scripts/extract_pubmed_citations.py"
 
 rule download_pubmed_data:
     output:

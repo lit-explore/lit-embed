@@ -1,3 +1,4 @@
+import string
 import numpy as np
 from scipy.stats import poisson
 
@@ -40,7 +41,7 @@ def get_stop_words(lemmatize=False):
     Returns a list of stop words
     """
     # source: gensim.parsing.preprocessing.STOPWORDS
-    # modified to remove some words which may be useful (subjective..): "fire", "system"
+    # modified to remove: "fire", "system"
     GENSIM_STOP_WORDS = ['a', 'about', 'above', 'across', 'after', 'afterwards', 'again',
             'against', 'all', 'almost', 'alone', 'along', 'already', 'also', 'although',
             'always', 'am', 'among', 'amongst', 'amoungst', 'amount', 'an', 'and',
@@ -89,6 +90,10 @@ def get_stop_words(lemmatize=False):
     STOP_WORDS = STOP_WORDS + list(string.digits)
     STOP_WORDS = STOP_WORDS + list(string.ascii_lowercase)
 
+    # add recent/upcoming years
+    STOP_WORDS = STOP_WORDS + [f"{x:04}" for x in range(2000, 2030)]
+
+    # other frequent but less informative words (subjective)
     STOP_WORDS = STOP_WORDS + ['add', 'affect', 'aim', 'analysis', 'applications',
             'approach', 'article', 'assess', 'associated', 'based', 'case', 'com',
             'compared', 'consider', 'corrigendum', 'current', 'data', 'demonstrate',
@@ -106,7 +111,7 @@ def get_stop_words(lemmatize=False):
             'revealed', 'review', 'role', 'set', 'showed', 'shown', 'significant',
             'significantly', 'solution', 'solutions', 'strategy', 'studies', 'study',
             'technique', 'term', 'terms', 'test', 'theory', 'thing', 'try', 'type', 'use',
-            'value', 'values', 'way', 'work', 'www', 'year']
+            'useful', 'value', 'values', 'way', 'work', 'www', 'year']
 
     # lemmatize?
     if lemmatize:
@@ -128,6 +133,9 @@ def get_stop_words(lemmatize=False):
         for sentence in doc.sentences:
             for word in sentence.words:
                 STOP_WORDS_LEMMA.append(word.lemma)
+
+        # work-around: "https" not properly removed?
+        STOP_WORDS_LEMMA.append("https")
 
         STOP_WORDS_LEMMA = set(STOP_WORDS_LEMMA)
 

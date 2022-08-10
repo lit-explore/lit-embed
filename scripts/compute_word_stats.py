@@ -42,7 +42,7 @@ res['ridf'] = ridfs
 # small number of articles or even a single article.
 # the effect of this is that those words with the highest RIDF scores tend to be words
 # found in a single article, and mentioned more than once.
-# by reitroducing a weight based on the log of the total number of articles mentioning a
+# by reintroducing a weight based on the log of the total number of articles mentioning a
 # word, words with such few article mentions are effectively penalized in the score.
 
 # scale to [0, 1]
