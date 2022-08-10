@@ -1,19 +1,5 @@
 """
 lit-embed: Scientific literature embedding pipeline
-
-TODO (July 27; after pipeline run finishes..)
-- [ ] modify tf-idf normalization so that contributions from IDF/TF-IDF both some to
-  "1", prior to weighting; can drop min-max scaling currently used...
-- [ ] future: disable non-lemmatized text processing for tf-idf/mr-idf, by default
-  (slow/doesn't seem too interesting..)
-- [ ] manually exclude words that don't match token pattern prior to generating "vocab":
-
-import re
-...
-
-# word_stats.token? or .index?
-mask = [bool(re.match(token_pattern, x)) for x in word_stats.token]
-word_stats = word_stats.loc[mask, :]
 """
 import os
 import pandas as pd
@@ -84,7 +70,9 @@ rule all:
         # co-citation
         join(output_dir, "data/pubmed/citations/citations.feather"),
         join(output_dir, "data/pubmed/citations/citations-stats.feather"),
-        join(output_dir, "data/pubmed/citations/citations-filtering-stats.feather")
+        join(output_dir, "data/pubmed/citations/test/co-citation1.feather"),
+        join(output_dir, "data/pubmed/citations/test/co-citation2.feather"),
+        join(output_dir, "data/pubmed/citations/test/co-citation3.feather")
 
 rule datashader:
     input:
@@ -141,16 +129,15 @@ rule compute_idf_embedding_article_correlations:
     script:
         "scripts/compute_article_correlations_within_embeddings.py"
 
-#
-# - N random sets of K articles?
-# - N random sets of K articles, limited to most recent year?
-# - Random subset by topics? (e.g. 'myeloma'?)
-#
 rule create_pubmed_test_sets:
     input:
+        join(output_dir, "data/pubmed/citations/citations.feather"),
+        join(output_dir, "data/pubmed/citations/citations-stats.feather"),
         join(output_dir, "data/pubmed/corpus/articles-baseline.csv")
     output:
-        join(output_dir, "data/pubmed/test/xx.csv")
+        join(output_dir, "data/pubmed/citations/test/co-citation1.feather"),
+        join(output_dir, "data/pubmed/citations/test/co-citation2.feather"),
+        join(output_dir, "data/pubmed/citations/test/co-citation3.feather")
     script:
         "scripts/create_pubmed_test_sets.py"
 
@@ -461,7 +448,6 @@ rule combine_pubmed_citations:
     output:
         join(output_dir, "data/pubmed/citations/citations.feather"),
         join(output_dir, "data/pubmed/citations/citations-stats.feather"),
-        join(output_dir, "data/pubmed/citations/citations-filtering-stats.feather")
     script:
         "scripts/combine_pubmed_citations.py"
 

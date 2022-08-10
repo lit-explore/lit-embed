@@ -26,7 +26,7 @@ for article in root.findall(".//PubmedArticle"):
     pmid = "" if pmid_elem is None else pmid_elem.text;
 
     doi_elem = article.find(".//ArticleId[@IdType='doi']")
-    doi = "" if doi_elem is None else doi_elem.text
+    doi = "" if doi_elem is None else doi_elem.text.lower()
 
     # extract article date
     try:
@@ -64,7 +64,7 @@ for article in root.findall(".//PubmedArticle"):
         ref_pmid = "" if ref_pmid_elem is None else ref_pmid_elem.text;
 
         ref_doi_elem = ref_elem.find(".//ArticleId[@IdType='doi']")
-        ref_doi = "" if ref_doi_elem is None else ref_doi_elem.text
+        ref_doi = "" if ref_doi_elem is None else ref_doi_elem.text.lower()
 
         if ref_pmid == "" and ref_doi == "":
             num_missing += 1
