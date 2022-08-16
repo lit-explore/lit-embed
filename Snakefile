@@ -51,10 +51,9 @@ rule all:
         expand(join(output_dir, "data/{source}/embeddings/{idf_type}-{processing}.feather"), source=data_sources, idf_type=idf_types, processing=proc_levels),
         expand(join(output_dir, "data/{source}/embeddings/bert-{agg_func}.feather"), source=data_sources, agg_func=agg_funcs),
 
-        # correlation matrices
-        # expand(join(output_dir, "data/{source}/correlation/articles/bert-{agg_func}.feather"), source=data_sources, agg_func=agg_funcs),
-        # expand(join(output_dir, "data/{source}/correlation/articles/{idf_type}-{processing}.feather"), source=data_sources, idf_type=idf_types, processing=proc_levels),
-        # expand(join(output_dir, "data/{source}/correlation/embedding_columns/{idf_type}-{processing}-bert-{agg_func}.feather"), source=data_sources, idf_type=idf_types, processing=proc_levels, agg_func=agg_funcs),
+        # embedding performance
+        expand(join(output_dir, "data/pubmed/performance/{idf_type}-{processing}.feather"), idf_type=idf_types, processing=proc_levels),
+        expand(join(output_dir, "data/pubmed/performance/bert-{agg_func}.feather"), agg_func=agg_funcs),
 
         # word stats
         expand(join(output_dir, "data/{source}/word-stats/{processing}.feather"), source=data_sources, processing=proc_levels),
@@ -104,30 +103,36 @@ rule compute_idf_cluster_average_embeddings:
     script:
         "scripts/compute_cluster_average_embeddings.py"
 
-rule compute_idf_bert_embedding_feature_correlations:
-    input:
-        join(output_dir, "data/{source}/embeddings/{idf_type}-{processing}.feather"),
-        join(output_dir, "data/{source}/embeddings/bert-{agg_func}.feather"),
-    output:
-        join(output_dir, "data/{source}/correlation/embedding_columns/{idf_type}-{processing}-bert-{agg_func}.feather")
-    script:
-        "scripts/compute_feature_correlations_across_embeddings.py"
+# rule compute_idf_bert_embedding_feature_correlations:
+#     input:
+#         join(output_dir, "data/{source}/embeddings/{idf_type}-{processing}.feather"),
+#         join(output_dir, "data/{source}/embeddings/bert-{agg_func}.feather"),
+#     output:
+#         join(output_dir, "data/{source}/correlation/embedding_columns/{idf_type}-{processing}-bert-{agg_func}.feather")
+#     script:
+#         "scripts/compute_cross_embedding_feature_correaltions.py"
 
-rule compute_bert_embedding_article_correlations:
+rule evaluate_bert_embedding_performance:
     input:
-        join(output_dir, "data/{source}/embeddings/bert-{agg_func}.feather"),
+        join(output_dir, "data/pubmed/embeddings/bert-{agg_func}.feather"),
+        join(output_dir, "data/pubmed/citations/test/co-citation1.feather"),
+        join(output_dir, "data/pubmed/citations/test/co-citation2.feather"),
+        join(output_dir, "data/pubmed/citations/test/co-citation3.feather")
     output:
-        join(output_dir, "data/{source}/correlation/articles/bert-{agg_func}.feather")
+        join(output_dir, "data/pubmed/performance/bert-{agg_func}.feather"),
     script:
-        "scripts/compute_article_correlations_within_embeddings.py"
+        "scripts/compute_article_embedding_correlations.py"
 
-rule compute_idf_embedding_article_correlations:
+rule evaluate_idf_embedding_performance:
     input:
-        join(output_dir, "data/{source}/embeddings/{idf_type}-{processing}.feather"),
+        join(output_dir, "data/pubmed/embeddings/{idf_type}-{processing}.feather"),
+        join(output_dir, "data/pubmed/citations/test/co-citation1.feather"),
+        join(output_dir, "data/pubmed/citations/test/co-citation2.feather"),
+        join(output_dir, "data/pubmed/citations/test/co-citation3.feather")
     output:
-        join(output_dir, "data/{source}/correlation/articles/{idf_type}-{processing}.feather")
+        join(output_dir, "data/pubmed/performance/{idf_type}-{processing}.feather"),
     script:
-        "scripts/compute_article_correlations_within_embeddings.py"
+        "scripts/compute_article_embedding_correlations.py"
 
 rule create_pubmed_test_sets:
     input:
