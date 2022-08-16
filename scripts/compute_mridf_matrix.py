@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 import scipy
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.preprocessing import MinMaxScaler
 from util.nlp import get_stop_words
 
 # get stop words list

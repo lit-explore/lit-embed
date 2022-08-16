@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 import scipy
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.preprocessing import MinMaxScaler
 from util.nlp import get_stop_words
 
 # get stop words list
@@ -69,15 +68,16 @@ for i in range(mat.shape[1]):
 
 mean_tfidfs = pd.Series(mean_tfidfs)
 
-# assign a score to each term based on a weighted combination IDF & mean TF-IDF
-scaler = MinMaxScaler()
-
-scaled_idf = scaler.fit_transform(vectorizer.idf_.reshape(-1, 1)).T[0]
-scaled_mean_tfidf = scaler.fit_transform(mean_tfidfs.values.reshape(-1, 1)).T[0]
+# normalize contribution of idf/mean tfidf scores; arbitrary 1e9 multiplier used for
+# convenience / human readability
+scaled_idf = (vectorizer.idf_/vectorizer.idf_.sum()) * 1e9
+scaled_mean_tfidf = (mean_tfidfs / mean_tfidfs.sum()) * 1e9
 
 # weights for combining IDF & mean TF-IDF contributions
 tfidf_coef = snakemake.config['word_freq']['alpha']
 idf_coef = 1 - tfidf_coef
+
+# assign a score to each term based on a weighted combination IDF & mean TF-IDF
 
 # store idf scores, for each term
 stats = pd.DataFrame({
