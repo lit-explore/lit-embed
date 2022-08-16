@@ -2,6 +2,7 @@
 Generates an article x term count matrix based on words with high modified residual IDF
 scores
 """
+import re
 import ujson
 import numpy as np
 import pandas as pd
@@ -19,6 +20,9 @@ num_feats = snakemake.config['word_freq']['num_features']
 # minimum character length for a token to be considered
 min_length = snakemake.config['tokenization']['min_length']
 
+# default token pattern, modifed to account for minimum token length
+token_pattern = r"(?u)\b\w{" + str(min_length) + r",}\b"
+
 # load word stats and remove stop words
 word_stats = pd.read_feather(snakemake.input[1])
 word_stats = word_stats[~word_stats.token.isin(stop_words)]
@@ -26,6 +30,11 @@ word_stats = word_stats[~word_stats.token.isin(stop_words)]
 # get top N words, ranked by mRIDF
 word_stats = word_stats.sort_values("mridf", ascending=False)
 word_stats = word_stats[word_stats.token.str.len() >= min_length]
+
+# exclude words that don't match the token pattern to prevent them from being included
+# in the vocabulary
+mask = [bool(re.match(token_pattern, x)) for x in word_stats.token]
+word_stats = word_stats.loc[mask, :]
 
 vocab = dict(zip(word_stats.token.values[:num_feats], range(num_feats)))
 
@@ -53,9 +62,6 @@ for index, row in dat.iterrows():
     corpus.append(text)
 
 del dat
-
-# default token pattern, modifed to account for minimum token length
-token_pattern = r"(?u)\b[a-zA-Z0-9]{" + str(min_length) + r",}\b"
 
 # count vocab words
 vectorizer = CountVectorizer(max_df=snakemake.config['word_freq']['max_df'],

@@ -34,6 +34,7 @@ for index, row in dat.iterrows():
 
 # default token pattern, modifed to account for minimum token lengths
 min_length = snakemake.config['tokenization']['min_length']
+
 token_pattern = r"(?u)\b\w{" + str(min_length) + r",}\b"
 
 # get word frequency matrix
