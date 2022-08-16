@@ -34,6 +34,27 @@ exclude_articles:
   missing_abstract: true
   missing_title: true
 
+# parameters to use for co-citation validation test set generation?
+# for now, just choosing articles at random to compare, and keep number of test sets
+# fixed to simplify pipeline
+validation:
+  # limit analysis to articles that have at least this many mapped citations
+  min_citations: 20
+  # random seed & size for test sets to be generated
+  test_sets:
+    set1:
+      topic: 'myeloma'
+      n: 1000
+      seed: 2837
+    set2:
+      topic: 'malaria'
+      n: 1000
+      seed: 9283
+    set3:
+      topic: 'single-cell'
+      n: 1000
+      seed: 5823
+
 # word frequency / tf-idf settings
 word_freq:
   # minimum/maximum number or proportion of articles which must include a term for it to
