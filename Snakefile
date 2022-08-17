@@ -59,8 +59,8 @@ rule all:
         expand(join(output_dir, "data/{source}/word-stats/{processing}.feather"), source=data_sources, processing=proc_levels),
 
         # cluster/word associations
-        expand(join(output_dir, "data/{source}/clusters/articles/associations/{idf_type}-{processing}-cluster-mridf-word-associations.feather"), source=data_sources, idf_type=idf_types, processing=proc_levels),
-        expand(join(output_dir, "data/{source}/clusters/articles/associations/bert-{agg_func}-cluster-mridf-word-associations.feather"), source=data_sources, agg_func=agg_funcs),
+        # expand(join(output_dir, "data/{source}/clusters/articles/associations/{idf_type}-{processing}-cluster-mridf-word-associations.feather"), source=data_sources, idf_type=idf_types, processing=proc_levels),
+        # expand(join(output_dir, "data/{source}/clusters/articles/associations/bert-{agg_func}-cluster-mridf-word-associations.feather"), source=data_sources, agg_func=agg_funcs),
 
         # plots
         expand(join(output_dir, "fig/{source}/{projection}/{target}/{idf_type}-{processing}-scatterplot.png"), source=data_sources, idf_type=idf_types, processing=proc_levels, target=targets, projection=projection_types),
