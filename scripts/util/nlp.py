@@ -84,7 +84,7 @@ def get_stop_words(lemmatize=False):
             'you', 'your', 'yours', 'yourself', 'yourselves']
 
     # add common two-digit numbers
-    STOP_WORDS = GENSIM_STOP_WORDS + [f"{x:02}" for x in range(20)]
+    STOP_WORDS = GENSIM_STOP_WORDS + [f"{x:02}" for x in range(101)]
 
     # add single letters and digits
     STOP_WORDS = STOP_WORDS + list(string.digits)
@@ -94,24 +94,25 @@ def get_stop_words(lemmatize=False):
     STOP_WORDS = STOP_WORDS + [f"{x:04}" for x in range(2000, 2030)]
 
     # other frequent but less informative words (subjective)
-    STOP_WORDS = STOP_WORDS + ['add', 'affect', 'aim', 'analysis', 'applications',
-            'approach', 'article', 'assess', 'associated', 'based', 'case', 'com',
-            'compared', 'consider', 'corrigendum', 'current', 'data', 'demonstrate',
-            'design', 'determine', 'different', 'discuss', 'effect', 'effective', 'effects',
-            'equation', 'equations', 'erratum', 'evaluate', 'evidence', 'examined',
-            'experience', 'findings', 'following', 'function', 'functions', 'given',
-            'healthy', 'http', 'https', 'identified', 'important', 'including', 'induced',
-            'investigate', 'investigated', 'key', 'known', 'large', 'like', 'mathbb',
-            'mathcal', 'mathrm', 'method', 'methods', 'model', 'models', 'need', 'new',
-            'non', 'novel', 'observed', 'obtain', 'obtained', 'org', 'outcome', 'overview',
-            'paper', 'parameter', 'parameters', 'particular', 'performance', 'performed',
-            'possible', 'presence', 'present', 'problem', 'problems', 'properties',
-            'propose', 'proposed', 'prove', 'provide', 'range', 'recent', 'related',
-            'relationship', 'report', 'research', 'respectively', 'result', 'results',
-            'revealed', 'review', 'role', 'set', 'showed', 'shown', 'significant',
-            'significantly', 'solution', 'solutions', 'strategy', 'studies', 'study',
-            'technique', 'term', 'terms', 'test', 'theory', 'thing', 'try', 'type', 'use',
-            'useful', 'value', 'values', 'way', 'work', 'www', 'year']
+    STOP_WORDS = STOP_WORDS + ['ability', 'access', 'according', 'add', 'affect', 'aim',
+            'aimed', 'aims', 'analysis', 'applications', 'approach', 'approaches',
+            'article', 'assess', 'assessed', 'associated', 'based', 'better',
+            'challenge', 'challenging', 'com', 'commonly', 'compared', 'consider',
+            'corrigendum', 'current', 'currently', 'demonstrate', 'design', 'determine',
+            'different', 'discuss', 'effect', 'effective', 'effects', 'erratum',
+            'especially', 'evaluate', 'evidence', 'examined', 'existing', 'experience',
+            'findings', 'focus', 'following', 'given', 'healthy', 'http', 'https',
+            'identified', 'important', 'including', 'induced', 'investigate',
+            'investigated', 'key', 'known', 'like', 'main', 'mathbb', 'mathcal',
+            'mathrm', 'method', 'methods', 'need', 'new', 'non', 'novel', 'observed',
+            'obtain', 'obtained', 'org', 'outcome', 'overview', 'paper', 'particular',
+            'performance', 'performed', 'possible', 'presence', 'present', 'problem',
+            'problems', 'properties', 'propose', 'proposed', 'prove', 'provide',
+            'range', 'recent', 'related', 'relationship', 'report', 'research',
+            'respectively', 'result', 'results', 'revealed', 'review', 'role', 'set',
+            'showed', 'shown', 'significant', 'significantly', 'solution', 'solutions',
+            'studies', 'study', 'technique', 'test', 'theory', 'thing', 'try', 'type',
+            'use', 'useful', 'value', 'values', 'way', 'work', 'www', 'year']
 
     # lemmatize?
     if lemmatize:
