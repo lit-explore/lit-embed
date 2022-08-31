@@ -37,7 +37,8 @@ else:
 idf_types = ['tfidf', 'mridf']
 data_sources = ['pubmed', 'arxiv']
 agg_funcs = ['mean', 'median', 'max']
-proc_levels = ['baseline', 'lemmatized']
+#proc_levels = ['baseline', 'lemmatized']
+proc_levels = ['baseline']
 projection_types = ['tsne', 'umap']
 targets = ['articles', 'embedding_columns']
 

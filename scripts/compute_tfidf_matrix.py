@@ -60,11 +60,13 @@ feat_names = vectorizer.get_feature_names_out()
 # determine mean tf-idf scores & number of articles each term found for
 article_counts = []
 mean_tfidfs = []
+max_tfidfs = []
 
 for i in range(mat.shape[1]):
     feat_vec = mat[:, i]
     article_counts.append(feat_vec.nnz)
     mean_tfidfs.append(feat_vec.mean())
+    max_tfidfs.append(feat_vec.max())
 
 mean_tfidfs = pd.Series(mean_tfidfs)
 
@@ -87,6 +89,7 @@ stats = pd.DataFrame({
     "num_articles": article_counts,
     "mean_tfidf": mean_tfidfs,
     "mean_tfidf_scaled": scaled_mean_tfidf,
+    "max_tfidf": max_tfidfs,
     "score": (tfidf_coef * scaled_mean_tfidf) + (idf_coef * scaled_idf)
 })
 
