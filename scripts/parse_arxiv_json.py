@@ -40,7 +40,8 @@ for line in lines:
     if snakemake.config['exclude_articles']['missing_abstract'] and article['abstract'] == "":
         continue
 
-    abstracts.append(article['abstract'])
+    abstract = article['abstract'].replace("\n", " ").strip()
+    abstracts.append(abstract)
 
     date_created = article['versions'][-1]['created'][5:]
     date_str = datetime.strptime(date_created, "%d %b %Y %H:%M:%S %Z").isoformat()

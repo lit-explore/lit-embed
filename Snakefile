@@ -27,7 +27,9 @@ pubmed_all = pubmed_annual + pubmed_updates
 model_dir = join(config['out_dir'], 'models')
 input_dir = join(config['out_dir'], 'input')
 
-# if "dev_mode" is enabled, operate on a subset of articles
+# if "dev_mode" is enabled, operate on a subset of articles; 
+# raw inputs are still processed for all articles indicated in config range, but only a subset of
+# articles are used starting from the "combine_xx_articles" rules.
 if config['dev_mode']['enabled']:
     output_dir = join(config['out_dir'], 'output', 'subsampled', str(config['dev_mode']['num_articles']))
 else:

@@ -18,7 +18,7 @@ if snakemake.config['dev_mode']['enabled']:
     random.seed(snakemake.config['random_seed'])
     random.shuffle(article_batches)
 else:
-    max_articles = float('inf') 
+    max_articles = float('inf')
 
 combined = pd.read_feather(article_batches[0])
 
