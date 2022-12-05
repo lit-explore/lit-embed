@@ -17,6 +17,9 @@ dates = []
 titles = []
 abstracts = []
 
+# max token length
+MAX_LEN = snakemake.config['tokens']['max_len']
+
 # iterate over articles in xml file
 for article in root.findall(".//PubmedArticle"):
     # extract title
@@ -45,7 +48,11 @@ for article in root.findall(".//PubmedArticle"):
     pmid = article.find(".//ArticleId[@IdType='pubmed']").text
 
     doi_elem = article.find(".//ArticleId[@IdType='doi']")
-    doi = "" if doi_elem is None else doi_elem.text.lower();
+
+    if doi_elem is None or doi_elem.text is None:
+        doi = ""
+    else:
+        doi = doi_elem.text.lower()
 
     try:
         date_elem = article.find(".//PubDate")
@@ -66,6 +73,10 @@ for article in root.findall(".//PubmedArticle"):
     except:
         # if date parsing fails, just leave field blank
         date_str = ""
+
+    # remove excessively long tokens
+    title = " ".join([x for x in title.split() if len(x) <= MAX_LEN])
+    abstract = " ".join([x for x in abstract.split() if len(x) <= MAX_LEN])
 
     pmids.append(pmid)
     dois.append(doi)

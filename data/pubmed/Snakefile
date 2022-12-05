@@ -1,0 +1,130 @@
+"""
+lit-embed: PubMed Data Preparation
+"""
+import os
+from os.path import join
+
+configfile: "config/config.yml"
+
+# pubmed annual file numbers
+pubmed_annual = [f"{n:04}" for n in range(config['pubmed']['annual_start'], 
+                                          config['pubmed']['annual_end'] + 1)]
+
+# pubmed update file numbers
+pubmed_updates = [f"{n:04}" for n in range(config['pubmed']['updates_start'], 
+                                          config['pubmed']['updates_end'] + 1)]
+
+# exclude pubmed22n0654.xml.gz (missing abstracts for all entries)
+if config['exclude_articles']['missing_abstract']:
+    pubmed_annual = [x for x in pubmed_annual if x != "0654"]
+
+batches = pubmed_annual + pubmed_updates
+
+input_dir = join(config['out_dir'], 'input')
+
+# if "dev_mode" is enabled, operate on a subset of articles; 
+# raw inputs are still processed for all articles indicated in config range, but only a subset of
+# articles are used starting from the "combine_xx_articles" rules.
+if config['dev_mode']['enabled']:
+    output_dir = join(config['out_dir'], 'output', 'subsampled', 
+                      str(config['dev_mode']['num_articles']))
+else:
+    output_dir = join(config['out_dir'], 'output', 'full')
+
+rule all:
+    input:
+        join(output_dir, "pubmed/corpus/baseline.csv"),
+        join(output_dir, "pubmed/corpus/lemmatized.csv"),
+        join(output_dir, "pubmed/citations/citations.feather"),
+        join(output_dir, "pubmed/citations/citations-stats.feather"),
+        join(output_dir, "pubmed/citations/test/co-citation1.feather"),
+        join(output_dir, "pubmed/citations/test/co-citation2.feather"),
+        join(output_dir, "pubmed/citations/test/co-citation3.feather")
+
+rule create_pubmed_test_sets:
+    input:
+        join(output_dir, "pubmed/citations/citations.feather"),
+        join(output_dir, "pubmed/citations/citations-stats.feather"),
+        join(output_dir, "pubmed/corpus/baseline.csv")
+    output:
+        join(output_dir, "pubmed/citations/test/co-citation1.feather"),
+        join(output_dir, "pubmed/citations/test/co-citation2.feather"),
+        join(output_dir, "pubmed/citations/test/co-citation3.feather")
+    script:
+        "scripts/create_pubmed_test_sets.py"
+
+rule combine_pubmed_articles:
+    input:
+        expand(join(input_dir, "pubmed/baseline/{pubmed_num}.feather"), pubmed_num=batches)
+    output:
+        join(output_dir, "pubmed/corpus/baseline.csv")
+    script:
+        "../../scripts/combine_articles.py"
+
+rule combine_pubmed_lemmatized_articles:
+    input:
+        expand(join(input_dir, "pubmed/lemmatized/{pubmed_num}.feather"), pubmed_num=batches)
+    output:
+        join(output_dir, "pubmed/corpus/lemmatized.csv")
+    script:
+        "../../scripts/combine_articles.py"
+
+rule create_lemmatized_pubmed_corpus:
+    input:
+        join(input_dir, "pubmed/baseline/{pubmed_num}.feather")
+    output:
+        join(input_dir, "pubmed/lemmatized/{pubmed_num}.feather")
+    resources:
+        load=40
+    script:
+        "../../scripts/lemmatize_text.py"
+
+rule combine_pubmed_citations:
+    input:
+        citations=expand(join(input_dir, "pubmed/citations/batches/{pubmed_num}.feather"), pubmed_num=batches),
+        stats=expand(join(input_dir, "pubmed/citations/batches/{pubmed_num}_stats.feather"), pubmed_num=batches)
+    output:
+        join(output_dir, "pubmed/citations/citations.feather"),
+        join(output_dir, "pubmed/citations/citations-stats.feather"),
+    script:
+        "scripts/combine_pubmed_citations.py"
+
+rule extract_pubmed_citations:
+    input:
+        join(input_dir, "pubmed/raw/pubmed22n{pubmed_num}.xml.gz")
+    output:
+        join(input_dir, "pubmed/citations/batches/{pubmed_num}.feather"),
+        join(input_dir, "pubmed/citations/batches/{pubmed_num}_stats.feather")
+    script:
+        "scripts/extract_pubmed_citations.py"
+
+rule parse_pubmed_xml:
+    input: 
+        join(input_dir, "pubmed/raw/pubmed22n{pubmed_num}.xml.gz")
+    output:
+        join(input_dir, "pubmed/baseline/{pubmed_num}.feather")
+    script:
+        "scripts/parse_pubmed_xml.py"
+
+rule download_pubmed_data:
+    output:
+        join(input_dir, "pubmed/raw/pubmed22n{pubmed_num}.xml.gz")
+    resources:
+        load=50
+    shell:
+        """
+        cd `dirname {output}`
+
+        if [ "{wildcards.pubmed_num}" -gt "{config[pubmed][annual_end]}" ]; then
+            echo "daily!";
+            ftpdir="updatefiles"
+        else
+            echo "annual!"
+            ftpdir="baseline"
+        fi
+
+        echo "https://ftp.ncbi.nlm.nih.gov/pubmed/${{ftpdir}}/pubmed22n{wildcards.pubmed_num}.xml.gz"
+        wget "https://ftp.ncbi.nlm.nih.gov/pubmed/${{ftpdir}}/pubmed22n{wildcards.pubmed_num}.xml.gz"
+        """
+
+# vi:syntax=snakemake

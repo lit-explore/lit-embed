@@ -1,0 +1,31 @@
+#
+# lit-embed: pubmed data preparation config
+#
+
+# base output directory
+out_dir: "/data/lit-embed"
+
+# development mode; if enabled, only a subset of articles are analyzed
+dev_mode:
+  enabled: false
+  num_articles: 100000
+
+# pubmed-related settings
+pubmed:
+  # start and end number for annual files
+  # https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
+  annual_start: 1000
+  annual_end: 1114
+  # start and end number for daily updates
+  # https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
+  updates_start: 1115
+  updates_end: 1468
+
+# factors to use to decide whether to exclude an article from analysis
+exclude_articles:
+  missing_abstract: true
+  missing_title: true
+
+# tokenization
+tokens:
+  max_len: 128
