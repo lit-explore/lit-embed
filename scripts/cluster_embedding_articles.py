@@ -20,26 +20,30 @@ clusters = kmeans.fit(dat).labels_
 # for word frequency / tfidf matrices where columns correspond to specific words,
 # generate human-readable cluster labels corresponding to the top 3 tokens associated
 # with the cluster
-if "processing" in snakemake.wildcards:
-    label_dict = []
+#  if "processing" in snakemake.wildcards:
+#      label_dict = []
+#
+#      for i in range(num_clusters):
+#          mask = clusters == i
+#
+#          dat_subset = dat[mask]
+#          dat_subset.sum().sort_values()
+#
+#          ranked_terms = dat_subset.sum().sort_values(ascending=False)
+#
+#          label_dict.append("_".join(ranked_terms.index[:3]))
+#
+#      mapping = {i:x for i, x in enumerate(label_dict)}
+#      cluster_labels = [mapping[x] for x in clusters]
+#
+#  else:
+#      # otherwise, just assign generic cluster names for now
+#      precision = math.ceil(math.log(num_clusters + 1, 10))
+#      cluster_labels = [f"cluster_{x:0{precision}}" for x in clusters]
 
-    for i in range(num_clusters):
-        mask = clusters == i
-
-        dat_subset = dat[mask]
-        dat_subset.sum().sort_values()
-
-        ranked_terms = dat_subset.sum().sort_values(ascending=False)
-
-        label_dict.append("_".join(ranked_terms.index[:3]))
-
-    mapping = {i:x for i, x in enumerate(label_dict)}
-    cluster_labels = [mapping[x] for x in clusters]
-
-else:
-    # otherwise, just assign generic cluster names for now
-    precision = math.ceil(math.log(num_clusters + 1, 10))
-    cluster_labels = [f"cluster_{x:0{precision}}" for x in clusters]
+# assign generic cluster names for now..
+precision = math.ceil(math.log(num_clusters + 1, 10))
+cluster_labels = [f"cluster_{x:0{precision}}" for x in clusters]
 
 res = pd.DataFrame({"article_id": dat.index, "cluster": cluster_labels})
 

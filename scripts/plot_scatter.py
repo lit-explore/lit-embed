@@ -59,14 +59,9 @@ elif "idf_type" in snakemake.wildcards.keys():
 else:
     name = "?"
 
-if "processing" in snakemake.wildcards.keys():
-    processing = snakemake.wildcards.processing
-else:
-    processing = snakemake.wildcards.agg_func
-
 projection = snakemake.wildcards['projection']
 
-plt_title = f"{source} {target.capitalize()} {name} {projection} ({processing}, n={num_items})"
+plt_title = f"{source} {target.capitalize()} {name} {projection} ({snakemake.config['processing']}, n={num_items})"
 
 size = snakemake.config['plots']['scatterplot']['size']
 

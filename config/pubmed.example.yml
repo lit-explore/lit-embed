@@ -1,0 +1,52 @@
+#
+# lit-embed PubMed example config
+#
+
+# pipeline target ["arxiv"|"pubmed"]
+target: "pubmed"
+
+# pubmed data directory;
+# https://github.com/lit-explore/pubmed
+input_dir: "/path/to/pubmed"
+
+# location to write output to
+out_dir: "/path/to/output"
+
+# processing level to use ["raw"|"lemmatized"]
+processing: "raw"
+
+# min/max article batch to process
+batches:
+  start: 1000
+  end: 1468
+
+# random seed
+random_seed: 321
+
+# factors to use to decide whether to exclude an article from analysis
+exclude_articles:
+  missing_abstract: true
+  missing_title: true
+
+# word frequency / tf-idf settings
+word_freq:
+  # minimum/maximum number or proportion of articles which must include a term for it to
+  # be used in word-freq/tf-df matrices
+  min_df: 0.001
+  max_df: 0.6
+  # datatype
+  dtype: 'float64'
+  # number of frequent (word-freq) or top-scoring (tf-idf) features to use for embeddings
+  num_features: 768
+  # for tf-idf feature selection, relative contribution of mean tf-idf vs. idf;
+  # value should be between "0" and "1", with values closer to "1" corresponding to a
+  # larger contribution from the mean tf-idf value for each term
+  alpha: 0.8
+
+tokenization:
+  min_length: 3
+
+# maximum count contribution of a single article when computing moderated residual IDF
+# scores
+word_stats:
+  moderated_ridf_max_count: 5

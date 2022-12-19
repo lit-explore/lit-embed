@@ -1,12 +1,6 @@
 """
 summary of word counts, etc. across all articles
 
-todo:
-
-- [ ] perform for both normal/lemmatized docs
-
-later (?)
-
 steps:
 
 - split title/abstract

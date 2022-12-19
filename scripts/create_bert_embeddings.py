@@ -46,8 +46,8 @@ for ind, article in dat.iterrows():
 
 # iterate over articles, and create embeddings
 mean_embeddings = []
-median_embeddings = []
-max_embeddings = []
+#  median_embeddings = []
+#  max_embeddings = []
 
 with torch.no_grad():
     for doc in tqdm(corpus):
@@ -64,8 +64,8 @@ with torch.no_grad():
         
         # compute article embedding as the mean of its word embeddings
         mean_embeddings.append(token_embeddings.mean(1)[0].detach().cpu().numpy())
-        median_embeddings.append(token_embeddings.median(1)[0].detach().cpu().numpy())
-        max_embeddings.append(token_embeddings.max(1)[0].detach().cpu().numpy())
+        #  median_embeddings.append(token_embeddings.median(1)[0].detach().cpu().numpy())
+        #  max_embeddings.append(token_embeddings.max(1)[0].detach().cpu().numpy())
 
 # store embeddings
 mean_df = pd.DataFrame(np.vstack(mean_embeddings), index=pd.Series(ids, name='article_id'))
@@ -73,12 +73,12 @@ mean_df.columns = [f"dim_{i}" for i in mean_df.columns]
 
 mean_df.reset_index().to_feather(snakemake.output[0])
 
-median_df = pd.DataFrame(np.vstack(median_embeddings), index=pd.Series(ids, name='article_id'))
-median_df.columns = [f"dim_{i}" for i in median_df.columns]
-
-median_df.reset_index().to_feather(snakemake.output[1])
-
-max_df = pd.DataFrame(np.vstack(max_embeddings), index=pd.Series(ids, name='article_id'))
-max_df.columns = [f"dim_{i}" for i in max_df.columns]
-
-max_df.reset_index().to_feather(snakemake.output[2])
+#  median_df = pd.DataFrame(np.vstack(median_embeddings), index=pd.Series(ids, name='article_id'))
+#  median_df.columns = [f"dim_{i}" for i in median_df.columns]
+#
+#  median_df.reset_index().to_feather(snakemake.output[1])
+#
+#  max_df = pd.DataFrame(np.vstack(max_embeddings), index=pd.Series(ids, name='article_id'))
+#  max_df.columns = [f"dim_{i}" for i in max_df.columns]
+#
+#  max_df.reset_index().to_feather(snakemake.output[2])

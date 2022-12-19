@@ -1,4 +1,3 @@
-#!/bin/python
 """
 Computes word usage statistics across all articles
 

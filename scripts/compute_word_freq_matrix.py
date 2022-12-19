@@ -8,7 +8,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from util.nlp import get_stop_words
 
 # get stop words lsit
-stop_words = get_stop_words(snakemake.wildcards['processing'] == 'lemmatized')
+stop_words = get_stop_words(snakemake.config['processing'] == 'lemmatized')
 
 # load articles
 dat = pd.read_csv(snakemake.input[0])

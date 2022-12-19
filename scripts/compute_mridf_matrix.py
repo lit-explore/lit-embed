@@ -11,7 +11,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from util.nlp import get_stop_words
 
 # get stop words list
-stop_words = get_stop_words(snakemake.wildcards['processing'] == 'lemmatized')
+stop_words = get_stop_words(snakemake.config['processing'] == 'lemmatized')
 
 # number of words to include
 num_feats = snakemake.config['word_freq']['num_features']

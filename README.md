@@ -1,6 +1,10 @@
 lit-embed
 =========
 
+TODO:
+
+- first run arxiv/pubmed pipelines
+
 Overview
 --------
 
