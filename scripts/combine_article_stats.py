@@ -2,22 +2,29 @@
 Combines batches of word stats into a single dataframe
 """
 import pandas as pd
+import pyarrow as pa
+from pyarrow.parquet import ParquetWriter
 
-dfs = []
+# pass 1: determine all possible category levels
+tokens = set()
 
 for infile in snakemake.input:
-    print(f"Loading {infile}...")
-    dfs.append(pd.read_feather(infile))
+    df = pd.read_parquet(infile)
+    tokens = tokens.union(set(df.token.values))
 
-# remove token which don't meet minimum batch filtering requirements
-#token_counts = res.groupby('token').total_count.agg(sum)
+token_dtype = pd.CategoricalDtype(categories=sorted(list(tokens)))
 
-#to_keep = token_counts[token_counts >= snakemake.config["filtering"]["batch_min_count"]].index
-#res = res[res.token.isin(to_keep)]
+# pass 2: read article batches in and append to output parquet file
+df = pd.read_parquet(snakemake.input[0])
+df.token = df.token.astype(token_dtype)
+tbl = pa.Table.from_pandas(df)
 
-print("Combining article stat dataframes..")
+pqwriter = ParquetWriter(snakemake.output[0], tbl.schema)
+pqwriter.write_table(tbl)
 
-combined = pd.concat(dfs)
+for infile in snakemake.input[1:]:
+    df = pd.read_parquet(infile)
+    df.token = df.token.astype(token_dtype)
+    pqwriter.write_table(pa.Table.from_pandas(df))
 
-combined.reset_index(drop=True).to_feather(snakemake.output[0])
-
+pqwriter.close()

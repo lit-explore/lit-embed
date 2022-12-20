@@ -64,7 +64,13 @@ res = pd.DataFrame(rows)
 stop_words = get_stop_words(snakemake.config['processing'] == 'lemmatized')
 res = res[~res.token.isin(stop_words)]
 
+# filter low count tokens
+token_counts = res.groupby('token').total_count.agg(sum)
+
+to_keep = token_counts[token_counts >= snakemake.config["filtering"]["batch_min_count"]].index
+res = res[res.token.isin(to_keep)]
+
 # set token type to "category" to reduce size
 res.token = res.token.astype('category')
 
-res.reset_index(drop=True).to_feather(snakemake.output[0])
+res.reset_index(drop=True).to_parquet(snakemake.output[0])

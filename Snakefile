@@ -43,9 +43,9 @@ batches = [x for x in batches if x in batches_allowed]
 
 rule combine_article_stats:
     input:
-        expand(join(config["out_dir"], "stats/articles/{batch}.feather"), batch=batches)
+        expand(join(config["out_dir"], "stats/articles/{batch}.parquet"), batch=batches)
     output:
-        join(config["out_dir"], "stats/articles.feather")
+        join(config["out_dir"], "stats/articles.parquet")
     script:
         "scripts/combine_article_stats.py"
 
@@ -53,7 +53,7 @@ rule compute_article_stats:
     input:
         join(batch_dir, "{batch}.feather")
     output:
-        join(config["out_dir"], "stats/articles/{batch}.feather")
+        join(config["out_dir"], "stats/articles/{batch}.parquet")
     script:
         "scripts/compute_article_stats.py"
 

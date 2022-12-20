@@ -28,6 +28,11 @@ exclude_articles:
   missing_abstract: true
   missing_title: true
 
+# token filtering settings
+filtering:
+  # minimum required token count within each article batch
+  batch_min_count: 10
+
 # word frequency / tf-idf settings
 word_freq:
   # minimum/maximum number or proportion of articles which must include a term for it to
