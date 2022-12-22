@@ -22,24 +22,35 @@ batches = [x for x in batches if x in batches_allowed]
 #     input:
 #         join(config["out_dir"], "embeddings/tfidf.feather"),
 
-# rule compute_tfidf_matrix:
+# rule build_tfidf_matrix:
 #     input:
-#         join(config["input_dir"], "corpus", config["processing"] + ".csv")
+#         join(config["out_dir"], "stats/tokens.parquet"),
+#         join(config["out_dir"], "stats/articles.parquet")
 #     output:
 #         join(config["out_dir"], "embeddings/tfidf.feather"),
 #         join(config["out_dir"], "embeddings/tfidf-sparse-mat.npz"),
 #         join(config["out_dir"], "embeddings/tfidf-stats.feather"),
-#     script: "scripts/compute_tfidf_matrix.py"
-#
-# rule compute_word_stats:
-#     input:
-#         join(config["out_dir"], "stats/word-counts.feather"),
-#     output:
-#         join(config["out_dir"], "stats/word-stats.feather"),
-#     script:
-#         "scripts/compute_word_stats.py"
+#     script: "scripts/build_tfidf_matrix.py"
 
-# expand(join(config["out_dir"], "stats/batches/word-counts-{batch}.feather"), batch=batches)
+rule compute_token_stats:
+    input:
+        join(config["out_dir"], "stats/articles.parquet")
+    output:
+        join(config["out_dir"], "stats/tokens.parquet"),
+    script:
+        "scripts/compute_token_stats.py"
+
+# rule compute_tfidf:
+#     input:
+#         join(config["out_dir"], "stats/articles.parquet")
+#     output:
+
+# rule compute_article_tfidf:
+#     input:
+#         join(config["out_dir"], "stats/articles.parquet")
+#     output:
+#         join(config["out_dir"], "stats/articles-tfidf.parquet")
+#     script:
 
 rule combine_article_stats:
     input:

@@ -1,9 +1,18 @@
 """
-Computes title, abstract, and article-level word counts + term frequencies
+Computes title, abstract, and article-level token counts + term frequencies
 """
 import pandas as pd
 import re
 from util.nlp import get_stop_words
+
+# get list of stop words
+STOP_WORDS = get_stop_words(snakemake.config['processing'] == 'lemmatized')
+
+# minimum token length to include
+MIN_TOKEN_LEN = snakemake.config['tokenization']['min_length']
+
+# target text? (title, abstract, or both)
+TARGET = snakemake.config['target']
 
 # match all alphanumeric tokens;
 regex = re.compile(r"[\w\d]+", re.UNICODE)
@@ -12,63 +21,53 @@ dat = pd.read_feather(snakemake.input[0]).set_index('id')
 
 rows = []
 
-i = 1
-
 for article_id, article in dat.iterrows():
-    # generate tokens for title & abstract;
-    # texts are first converted to lowercase (already the case for lemmatized input)
-    title_parts = [match.group() for match in regex.finditer(article.title.lower())]
-    abstract_parts = [match.group() for match in regex.finditer(article.abstract.lower())]
+    # extract target text
+    if TARGET == "title":
+        text = article.title.lower()
+    elif TARGET == "abstract":
+        text = article.abstract.lower()
+    else:
+        text = article.title.lower() + " " + article.abstract.lower()
 
-    # compute counts of each word, for each section
-    title_counts = pd.Series(title_parts, dtype=str).value_counts()
-    abstract_counts = pd.Series(abstract_parts, dtype=str).value_counts()
+    # get a list of tokens as they appear in the target text
+    tokens = [match.group() for match in regex.finditer(text)]
 
-    # get a list of all tokens which appear in either title/abstract
-    all_tokens = sorted(list(set(title_parts + abstract_parts)))
+    # exclude stop words
+    tokens = [x for x in tokens if x not in STOP_WORDS]
 
-    # number of tokens in title, abstract, or both
-    title_len = int(title_counts.sum())
-    abstract_len = int(abstract_counts.sum())
-    total_len = title_len + abstract_len
+    # exclude tokens that are below the minimum required len
+    tokens = [x for x in tokens if len(x) >= MIN_TOKEN_LEN] 
+    
+    # total number of tokens remaining
+    num_tokens = len(tokens)
 
-    # iterate over token and compute counts, etc. for each
-    for token in all_tokens:
-        # word counts
-        title_count = int(title_counts[token]) if token in title_counts else 0
-        abstract_count = int(abstract_counts[token]) if token in abstract_counts else 0
-        total_count = title_count + abstract_count
+    # compute counts of each token
+    token_counts = pd.Series(tokens, dtype=str).value_counts()
+
+    # iterate over each unique token and compute article-level stats
+    for token in sorted(list(set(tokens))):
+        # token counts
+        token_count = int(token_counts[token]) if token in token_counts else 0
 
         # term frequency
-        title_tf = (title_count / title_len) if title_len > 0 else 0
-        abstract_tf = (abstract_count / abstract_len) if abstract_len > 0 else 0
-        total_tf = (total_count / total_len) if total_len > 0 else 0
+        tf = (token_count / num_tokens) if num_tokens > 0 else 0
 
         rows.append({
             'id': int(article_id),
             'token': token,
-            'title_count': title_count,
-            'abstract_count': abstract_count,
-            'total_count': total_count,
-            'title_tf': title_tf,
-            'abstract_tf': abstract_tf,
-            'total_tf': total_tf
+            'count': token_count,
+            'tf': tf,
         })
 
-    i += 1
-
-# generate a dataframe and store results
+# combine into a single dataframe
 res = pd.DataFrame(rows)
 
-# exclude stop words
-stop_words = get_stop_words(snakemake.config['processing'] == 'lemmatized')
-res = res[~res.token.isin(stop_words)]
-
 # filter low count tokens
-token_counts = res.groupby('token').total_count.agg(sum)
+#  token_counts = res.groupby('token').total_count.agg(sum)
 
-to_keep = token_counts[token_counts >= snakemake.config["filtering"]["batch_min_count"]].index
-res = res[res.token.isin(to_keep)]
+#  to_keep = token_counts[token_counts >= snakemake.config["filtering"]["batch_min_count"]].index
+#  res = res[res.token.isin(to_keep)]
 
 # set token type to "category" to reduce size
 res.token = res.token.astype('category')

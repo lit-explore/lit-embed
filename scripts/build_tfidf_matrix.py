@@ -1,15 +1,11 @@
 """
 Computes TF-IDF version of word frequencies
 """
-import ujson
 import numpy as np
 import pandas as pd
 import scipy
-from sklearn.feature_extraction.text import TfidfVectorizer
+#from sklearn.feature_extraction.text import TfidfVectorizer
 from util.nlp import get_stop_words
-
-# get stop words list
-stop_words = get_stop_words(snakemake.config['processing'] == 'lemmatized')
 
 # load articles
 dtypes = {'id': 'str', 'doi': 'str', 'title': 'str', 'abstract': 'str', 'date': 'str'}

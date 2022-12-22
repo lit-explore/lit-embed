@@ -1,5 +1,5 @@
 """
-Combines batches of word stats into a single dataframe
+Combines batches of article-level token stats into a single dataset
 """
 import pandas as pd
 import pyarrow as pa
