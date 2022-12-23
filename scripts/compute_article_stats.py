@@ -12,7 +12,7 @@ STOP_WORDS = get_stop_words(snakemake.config['processing'] == 'lemmatized')
 MIN_TOKEN_LEN = snakemake.config['tokenization']['min_length']
 
 # target text? (title, abstract, or both)
-TARGET = snakemake.config['target']
+TEXT_SOURCE = snakemake.config['text_source']
 
 # match all alphanumeric tokens;
 regex = re.compile(r"[\w\d]+", re.UNICODE)
@@ -23,9 +23,9 @@ rows = []
 
 for article_id, article in dat.iterrows():
     # extract target text
-    if TARGET == "title":
+    if TEXT_SOURCE == "title":
         text = article.title.lower()
-    elif TARGET == "abstract":
+    elif TEXT_SOURCE == "abstract":
         text = article.abstract.lower()
     else:
         text = article.title.lower() + " " + article.abstract.lower()
@@ -54,7 +54,7 @@ for article_id, article in dat.iterrows():
         tf = (token_count / num_tokens) if num_tokens > 0 else 0
 
         rows.append({
-            'id': int(article_id),
+            'id': article_id,
             'token': token,
             'count': token_count,
             'tf': tf,
@@ -63,13 +63,11 @@ for article_id, article in dat.iterrows():
 # combine into a single dataframe
 res = pd.DataFrame(rows)
 
-# filter low count tokens
-#  token_counts = res.groupby('token').total_count.agg(sum)
-
-#  to_keep = token_counts[token_counts >= snakemake.config["filtering"]["batch_min_count"]].index
-#  res = res[res.token.isin(to_keep)]
-
-# set token type to "category" to reduce size
+# set token dtype to "category" to reduce size
 res.token = res.token.astype('category')
+
+# store pubmed article ids as numeric
+if snakemake.config["corpus"] == "pubmed":
+    res.id = res.id.astype(int)
 
 res.reset_index(drop=True).to_parquet(snakemake.output[0])

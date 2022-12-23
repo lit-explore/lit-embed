@@ -101,7 +101,7 @@ def get_stop_words(lemmatize=False):
             'corrigendum', 'current', 'currently', 'demonstrate', 'design', 'determine',
             'different', 'discuss', 'effect', 'effective', 'effects', 'erratum',
             'especially', 'evaluate', 'evidence', 'examined', 'existing', 'experience',
-            'findings', 'focus', 'following', 'given', 'healthy', 'http', 'https',
+            'findings', 'focus', 'following', 'furthermore', 'given', 'healthy', 'http', 'https',
             'identified', 'important', 'including', 'induced', 'investigate',
             'investigated', 'key', 'known', 'like', 'main', 'mathbb', 'mathcal',
             'mathrm', 'method', 'methods', 'need', 'new', 'non', 'novel', 'observed',

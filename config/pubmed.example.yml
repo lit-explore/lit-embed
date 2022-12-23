@@ -2,8 +2,8 @@
 # lit-embed PubMed example config
 #
 
-# pipeline target ["arxiv"|"pubmed"]
-target: "pubmed"
+# text corpus ["arxiv"|"pubmed"]
+corpus: "pubmed"
 
 # pubmed data directory;
 # https://github.com/lit-explore/pubmed
@@ -14,6 +14,12 @@ out_dir: "/path/to/output"
 
 # processing level to use ["raw"|"lemmatized"]
 processing: "raw"
+
+# article text to use ["title"|"abstract"|"both"]
+text_source: "both"
+
+# embedding dimensions
+embedding_dim: 768
 
 # min/max article batch to process
 batches:
@@ -30,23 +36,10 @@ exclude_articles:
 
 # token filtering settings
 filtering:
-  # minimum required token count within each article batch
-  batch_min_count: 10
-
-# word frequency / tf-idf settings
-word_freq:
-  # minimum/maximum number or proportion of articles which must include a term for it to
-  # be used in word-freq/tf-df matrices
-  min_df: 0.001
-  max_df: 0.6
-  # datatype
-  dtype: 'float64'
-  # number of frequent (word-freq) or top-scoring (tf-idf) features to use for embeddings
-  num_features: 768
-  # for tf-idf feature selection, relative contribution of mean tf-idf vs. idf;
-  # value should be between "0" and "1", with values closer to "1" corresponding to a
-  # larger contribution from the mean tf-idf value for each term
-  alpha: 0.8
+  # minimum ratio of articles that token must appear in
+  min_article_ratio: 0.001
+  # max ratio of articles that token is allowed to appear in
+  max_article_ratio: 0.5
 
 tokenization:
   min_length: 3

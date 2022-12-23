@@ -34,7 +34,7 @@ res = df.groupby('token').sum()
 res['num_articles'] = df.groupby('token').agg('count')['tf']
 
 # compute token idf
-res['idf'] = np.log(N / (1 + res['num_articles']))
+res['idf'] = np.log((1 + N)/ (1 + res['num_articles']))
 
 # convert categorical index to str for faster indexing (~1000x speed-up in testing..)
 res = res.reindex(list(res.index))
@@ -47,8 +47,8 @@ df['tfidf'] = df['tf'] * df['idf']
 
 print("Computing mean TF-IDF..")
 
-# compute token-level mean tf-idf
-res['mean_tfidf'] = df[['token', 'tfidf']].groupby('token').mean()
+# compute token-level mean tf-idf for each token across all articles
+res['mean_tfidf'] = df[['token', 'tfidf']].groupby('token').sum() / N
 
 # store article-level tfidf (not used atm, so leaving out to keep things simple..)
 # df.head[['token', 'tfidf']].reset_index().to_parquet(snakemake.output[1])
