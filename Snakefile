@@ -25,13 +25,15 @@ if len(batches) == 0:
 #     input:
 #         join(config["out_dir"], "embeddings/tfidf.feather"),
 
-rule create_tfidf_embeddings:
+rule embed_articles:
     input:
         join(config["out_dir"], "stats/tokens.parquet"),
-        join(config["out_dir"], "stats/articles.parquet")
     output:
-        join(config["out_dir"], "embeddings/tfidf.feather"),
-    script: "scripts/create_tfidf_embeddings.py"
+        join(config["out_dir"], "embeddings/tfidf.npz"),
+        join(config["out_dir"], "embeddings/ridf.npz"),
+        join(config["out_dir"], "embeddings/ensemble.npz"),
+        join(config["out_dir"], "embeddings/embedding_tokens.feather"),
+    script: "scripts/embed_articles.py"
 
 rule compute_token_stats:
     input:
