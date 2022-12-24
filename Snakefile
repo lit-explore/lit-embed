@@ -21,10 +21,6 @@ batches = [x for x in batches if x in batches_allowed]
 if len(batches) == 0:
     raise Exception("No input batches found!")
 
-# rule all:
-#     input:
-#         join(config["out_dir"], "embeddings/tfidf.feather"),
-
 rule embed_articles:
     input:
         join(config["out_dir"], "stats/tokens.parquet"),
@@ -33,6 +29,7 @@ rule embed_articles:
         join(config["out_dir"], "embeddings/ridf.npz"),
         join(config["out_dir"], "embeddings/ensemble.npz"),
         join(config["out_dir"], "embeddings/embedding_tokens.feather"),
+        join(config["out_dir"], "embeddings/article_ids.txt"),
     script: "scripts/embed_articles.py"
 
 rule compute_token_stats:

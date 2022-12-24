@@ -23,6 +23,9 @@ dat = pd.read_feather(infile)
 # total number of articles
 N = dat.shape[0]
 
+# get list of article ids
+article_ids = dat.id.values.tolist()
+
 # combine lowercase title + abstract to form corpus
 corpus = []
 
@@ -97,3 +100,7 @@ df =  pd.DataFrame({
 })
 
 df.to_feather(snakemake.output[3])
+
+# store embedding article ids
+with open(snakemake.output[4], "w") as fp:
+    fp.write("\n".join([str(x) for x in article_ids]))
