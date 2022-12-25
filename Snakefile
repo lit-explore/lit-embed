@@ -25,6 +25,7 @@ rule embed_articles:
     input:
         join(config["out_dir"], "stats/tokens.parquet"),
     output:
+        join(config["out_dir"], "embeddings/frequency.npz"),
         join(config["out_dir"], "embeddings/tfidf.npz"),
         join(config["out_dir"], "embeddings/ridf.npz"),
         join(config["out_dir"], "embeddings/ensemble.npz"),
