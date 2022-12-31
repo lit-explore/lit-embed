@@ -4,27 +4,43 @@ Computes article correlations _within_ each embedding matrix.
 """
 import pandas as pd
 import numpy as np
+from scipy.sparse import load_npz
+
+# assign snakemake to a known variable to prevent excessive mypy, etc. warnings
+snek = snakemake
 
 # load embedding matrix
-embed_mat = pd.read_feather(snakemake.input[0]).set_index('article_id')
+mat = load_npz(snek.input[0])
+
+# load embedding tokens
+embedding_tokens = pd.read_feather(snek.input[1])
+
+# load embedding article ids
+with open(snek.input[2], "rt", encoding="utf-8") as fp:
+    article_ids = fp.read().split('\n')
+
+# convert sparse matrix to a dense one
+embed_mat = pd.DataFrame(mat.todense(),
+                         index=pd.Series(article_ids, name='article_id'),
+                         columns=embedding_tokens.tfidf.values)
 
 # get article test sets
-cite_mat1 = pd.read_feather(snakemake.input[1]).set_index('ref_pmid')
-cite_mat2 = pd.read_feather(snakemake.input[2]).set_index('ref_pmid')
-cite_mat3 = pd.read_feather(snakemake.input[3]).set_index('ref_pmid')
+cite_mat1 = pd.read_feather(snek.input[3]).set_index('ref_pmid')
+cite_mat2 = pd.read_feather(snek.input[4]).set_index('ref_pmid')
+cite_mat3 = pd.read_feather(snek.input[5]).set_index('ref_pmid')
 
-def compute_embedding_cocite_cor(embed_mat:pd.DataFrame, cite_mat:pd.DataFrame) -> pd.DataFrame:
+def compute_embedding_cocite_cor(X:pd.DataFrame, cite_mat:pd.DataFrame) -> pd.DataFrame:
     """
     Generates an embedding correlation matrix for the same articles present in an inpute
     co-citation matrix, and then computes the correlation of the two matrices.
     """
     pmids = cite_mat.index.values
-    submat = embed_mat.loc[pmids]
+    submat = X.loc[pmids]
 
     # sanity check
     if not (pd.Series(submat.index.values) == pd.Series(cite_mat.index.values)).all():
         raise Exception("Article mismatch!")
-    
+
     embed_cor_mat = submat.T.corr()
 
     # compute correlation for lower triangular matrices, excluding diagonals
@@ -44,4 +60,4 @@ res = pd.DataFrame({
     "cor": [cor1, cor2, cor3]
 })
 
-res.to_feather(snakemake.output[0])
+res.to_feather(snek.output[0])

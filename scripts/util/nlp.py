@@ -117,12 +117,11 @@ def get_stop_words(lemmatize=False):
     # lemmatize?
     if lemmatize:
         import stanza
-        from stanza.pipeline.core import ResourcesFileNotFoundError
 
         # create lemmatized version of stopwords
         try:
             nlp = stanza.Pipeline(lang='en', processors='tokenize,pos,lemma')
-        except ResourcesFileNotFoundError:
+        except:
             print("Downloading Stanza English language models for new install..")
             stanza.download('en')
             nlp = stanza.Pipeline(lang='en', processors='tokenize,pos,lemma')

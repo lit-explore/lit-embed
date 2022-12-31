@@ -20,6 +20,9 @@ DIM:int = snek.config['embedding_dim']
 infile = os.path.join(snek.config["input_dir"], "corpus", snek.config["processing"] + ".feather")
 dat = pd.read_feather(infile)
 
+dat.title.fillna("", inplace=True)
+dat.abstract.fillna("", inplace=True)
+
 # total number of articles
 N = dat.shape[0]
 
