@@ -1,5 +1,5 @@
 """
-Creates an article embedding based on high TF-IDF terms.
+Creates alternate article embeddings based on token statistics, etc.
 """
 import os
 import pandas as pd
@@ -48,7 +48,7 @@ max_cutoff = MAX_ARTICLE_RATIO * N
 tokens = tokens[(tokens.num_articles >= min_cutoff) & (tokens.num_articles <= max_cutoff)]
 
 # get top tokens based on simple word frequency
-frequency_tokens = tokens.sort_values('count', ascending=False).head(DIM).token.values
+frequency_tokens = tokens.sort_values('n', ascending=False).head(DIM).token.values
 
 # get top tokens based on mean tf-idf and residual idf
 tfidf_tokens = tokens.sort_values('mean_tfidf', ascending=False).head(DIM).token.values

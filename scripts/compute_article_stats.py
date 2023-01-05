@@ -56,7 +56,7 @@ for article_id, article in dat.iterrows():
         rows.append({
             'id': article_id,
             'token': token,
-            'count': token_count,
+            'n': token_count,
             'tf': tf,
         })
 

@@ -60,7 +60,7 @@ del df
 ridfs = []
 
 for token, row in res.iterrows():
-    ridfs.append(ridf(row["count"], row["num_articles"], N))
+    ridfs.append(ridf(row["n"], row["num_articles"], N))
 
 res['ridf'] = ridfs
 
@@ -81,6 +81,6 @@ adj_ridfs = adj_ridfs / adj_ridfs.max()
 res['adj_ridf'] = adj_ridfs
 
 # sort by frequency and write out
-res = res.sort_values('count', ascending=False)
+res = res.sort_values('n', ascending=False)
 
 res.reset_index().to_parquet(snakemake.output[0])
