@@ -44,6 +44,13 @@ filtering:
 tokenization:
   min_length: 3
 
+# token co-occurence analysis settings
+cooccurrence:
+  # minimum count required for a token to be included in co-occurrence analysis
+  token_min_freq: 1000
+  # when estimating token co-occurrence, number of articles to be randomly sampled
+  subsample_num_articles: 10000
+
 # maximum count contribution of a single article when computing moderated residual IDF
 # scores
 word_stats:

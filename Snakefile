@@ -21,6 +21,11 @@ batches = [x for x in batches if x in batches_allowed]
 if len(batches) == 0:
     raise Exception("No input batches found!")
 
+rule all:
+    input:
+        join(config["out_dir"], "embeddings/ensemble.npz"),
+        join(config["out_dir"], "stats/token-correlations.feather")
+
 rule embed_articles:
     input:
         join(config["out_dir"], "stats/tokens.parquet"),
@@ -32,6 +37,23 @@ rule embed_articles:
         join(config["out_dir"], "embeddings/embedding_tokens.feather"),
         join(config["out_dir"], "embeddings/article_ids.txt"),
     script: "scripts/embed_articles.py"
+
+rule compute_token_correlations:
+    input:
+        join(config["out_dir"], "stats/co-occurrence.feather")
+    output:
+        join(config["out_dir"], "stats/token-correlations.feather")
+    script:
+        "scripts/compute_token_correlations.py"
+
+rule compute_token_cooccurence:
+    input:
+        join(config["out_dir"], "stats/articles.parquet"),
+        join(config["out_dir"], "stats/tokens.parquet")
+    output:
+        join(config["out_dir"], "stats/co-occurrence.feather")
+    script:
+        "scripts/compute_token_cooccurrence.py"
 
 rule compute_token_stats:
     input:
