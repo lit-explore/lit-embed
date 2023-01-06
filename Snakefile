@@ -24,7 +24,7 @@ if len(batches) == 0:
 rule all:
     input:
         join(config["out_dir"], "embeddings/ensemble.npz"),
-        join(config["out_dir"], "stats/token-correlations.feather")
+        join(config["out_dir"], "stats/correlated-token-pairs.feather")
 
 rule embed_articles:
     input:
@@ -37,6 +37,14 @@ rule embed_articles:
         join(config["out_dir"], "embeddings/embedding_tokens.feather"),
         join(config["out_dir"], "embeddings/article_ids.txt"),
     script: "scripts/embed_articles.py"
+
+rule detect_correlated_token_pairs:
+    input:
+        join(config["out_dir"], "stats/token-correlations.feather")
+    output:
+        join(config["out_dir"], "stats/correlated-token-pairs.feather")
+    script:
+        "scripts/detect_correlated_token_pairs.py"
 
 rule compute_token_correlations:
     input:
