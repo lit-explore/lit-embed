@@ -5,19 +5,21 @@ import pandas as pd
 import re
 from util.nlp import get_stop_words
 
+snek = snakemake
+
 # get list of stop words
-STOP_WORDS = get_stop_words(snakemake.config['processing'] == 'lemmatized')
+STOP_WORDS = get_stop_words(snek.config['processing'] == 'lemmatized')
 
 # minimum token length to include
-MIN_TOKEN_LEN = snakemake.config['tokenization']['min_length']
+MIN_TOKEN_LEN = snek.config['tokenization']['min_length']
 
 # target text? (title, abstract, or both)
-TEXT_SOURCE = snakemake.config['text_source']
+TEXT_SOURCE = snek.config['text_source']
 
 # match all alphanumeric tokens;
 regex = re.compile(r"[\w\d]+", re.UNICODE)
 
-dat = pd.read_feather(snakemake.input[0]).set_index('id')
+dat = pd.read_feather(snek.input[0]).set_index('id')
 
 rows = []
 
@@ -67,7 +69,7 @@ res = pd.DataFrame(rows)
 res.token = res.token.astype('category')
 
 # store pubmed article ids as numeric
-if snakemake.config["corpus"] == "pubmed":
+if snek.config["corpus"] == "pubmed":
     res.id = res.id.astype(int)
 
-res.reset_index(drop=True).to_parquet(snakemake.output[0])
+res.reset_index(drop=True).to_parquet(snek.output[0])

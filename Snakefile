@@ -24,7 +24,8 @@ if len(batches) == 0:
 rule all:
     input:
         join(config["out_dir"], "embeddings/ensemble.npz"),
-        join(config["out_dir"], "stats/correlated-token-pairs.feather")
+        join(config["out_dir"], "ngrams/counts.feather"),
+        expand(join(config["out_dir"], "ngrams/corpus/{batch}.feather"), batch=batches)
 
 rule embed_articles:
     input:
@@ -37,6 +38,32 @@ rule embed_articles:
         join(config["out_dir"], "embeddings/embedding_tokens.feather"),
         join(config["out_dir"], "embeddings/article_ids.txt"),
     script: "scripts/embed_articles.py"
+
+rule replace_ngrams:
+    input:
+        join(batch_dir, "{batch}.feather"),
+        join(config["out_dir"], "ngrams/counts.feather")
+    output:
+        join(config["out_dir"], "ngrams/corpus/{batch}.feather")
+    script:
+        "scripts/replace_ngrams.py"
+
+rule combine_ngrams:
+    input:
+        expand(join(config["out_dir"], "ngrams/counts/{batch}.feather"), batch=batches)
+    output:
+        join(config["out_dir"], "ngrams/counts.feather")
+    script:
+        "scripts/combine_ngrams.py"
+
+rule detect_ngrams:
+    input:
+        join(batch_dir, "{batch}.feather"),
+        join(config["out_dir"], "stats/correlated-token-pairs.feather"),
+    output:
+        join(config["out_dir"], "ngrams/counts/{batch}.feather")
+    script:
+        "scripts/detect_ngrams.py"
 
 rule detect_correlated_token_pairs:
     input:
