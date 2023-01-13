@@ -17,8 +17,7 @@ MAX_ARTICLE_RATIO:float = snek.config['filtering']['max_article_ratio']
 DIM:int = snek.config['embedding_dim']
 
 # load article corpus
-infile = os.path.join(snek.config["input_dir"], "corpus", snek.config["processing"] + ".feather")
-dat = pd.read_feather(infile)
+dat = pd.read_feather(snek.input[0])
 
 dat.title.fillna("", inplace=True)
 dat.abstract.fillna("", inplace=True)
@@ -39,7 +38,7 @@ for index, row in dat.iterrows():
 del dat
 
 # load token-level stats
-tokens = pd.read_parquet(snek.input[0])
+tokens = pd.read_parquet(snek.input[1])
 
 # remove tokens above/below cutoffs
 min_cutoff = MIN_ARTICLE_RATIO * N

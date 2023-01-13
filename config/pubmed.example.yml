@@ -34,22 +34,30 @@ exclude_articles:
   missing_abstract: true
   missing_title: true
 
-# token filtering settings
-filtering:
-  # minimum ratio of articles that token must appear in
-  min_article_ratio: 0.001
-  # max ratio of articles that token is allowed to appear in
-  max_article_ratio: 0.5
-
 tokenization:
   min_length: 3
 
 # token co-occurence analysis settings
 cooccurrence:
   # minimum count required for a token to be included in co-occurrence analysis
-  token_min_freq: 1000
+  token_min_freq: 10000
   # when estimating token co-occurrence, number of articles to be randomly sampled
-  subsample_num_articles: 10000
+  subsample_num_articles: 100000
+
+# minimum pearson correlation coefficent required for a token pair to be included
+# in table of correlated token pairs and to be checked as a possible n-gram
+token_min_cor: 0.15
+
+# minimum number of times a pair of tokens must appear together in order to be
+# treated as an n-gram
+ngram_min_freq: 100
+
+# token filtering settings
+filtering:
+  # minimum ratio of articles that token must appear in
+  min_article_ratio: 0.001
+  # max ratio of articles that token is allowed to appear in
+  max_article_ratio: 0.5
 
 # maximum count contribution of a single article when computing moderated residual IDF
 # scores

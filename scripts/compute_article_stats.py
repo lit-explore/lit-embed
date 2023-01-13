@@ -17,7 +17,7 @@ MIN_TOKEN_LEN = snek.config['tokenization']['min_length']
 TEXT_SOURCE = snek.config['text_source']
 
 # match all alphanumeric tokens;
-regex = re.compile(r"[\w\d]+", re.UNICODE)
+regex = re.compile(r"[\w\d_]+", re.UNICODE)
 
 dat = pd.read_feather(snek.input[0]).set_index('id')
 

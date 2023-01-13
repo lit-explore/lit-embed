@@ -6,10 +6,8 @@ import os
 import pandas as pd
 from os.path import join
 
-# directory with batched article data
-batch_dir = join(config["input_dir"], config["processing"])
-
 # get list of article batch ids
+batch_dir = join(config["input_dir"], config["processing"])
 batches = [os.path.splitext(x)[0] for x in os.listdir(batch_dir)]
 
 # limit to requested range
@@ -24,11 +22,11 @@ if len(batches) == 0:
 rule all:
     input:
         join(config["out_dir"], "embeddings/ensemble.npz"),
-        join(config["out_dir"], "ngrams/counts.feather"),
-        expand(join(config["out_dir"], "ngrams/corpus/{batch}.feather"), batch=batches)
+        join(config["out_dir"], "ngrams", "corpus", config["processing"] + ".feather")
 
 rule embed_articles:
     input:
+        join(config["input_dir"], "corpus", config["processing"] + ".feather"),
         join(config["out_dir"], "stats/tokens.parquet"),
     output:
         join(config["out_dir"], "embeddings/frequency.npz"),
@@ -39,12 +37,20 @@ rule embed_articles:
         join(config["out_dir"], "embeddings/article_ids.txt"),
     script: "scripts/embed_articles.py"
 
+rule combine_ngram_articles:
+    input:
+        expand(join(config["out_dir"], "ngrams", config["processing"], "{batch}.feather"), batch=batches)
+    output:
+        join(config["out_dir"], "ngrams", "corpus", config["processing"] + ".feather")
+    script:
+        "scripts/combine_articles.py"
+
 rule replace_ngrams:
     input:
         join(batch_dir, "{batch}.feather"),
         join(config["out_dir"], "ngrams/counts.feather")
     output:
-        join(config["out_dir"], "ngrams/corpus/{batch}.feather")
+        join(config["out_dir"], "ngrams", config["processing"], "{batch}.feather")
     script:
         "scripts/replace_ngrams.py"
 
