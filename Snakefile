@@ -22,7 +22,7 @@ if len(batches) == 0:
 rule all:
     input:
         join(config["out_dir"], "embeddings/ensemble.npz"),
-        join(config["out_dir"], "ngrams", "corpus", config["processing"] + ".feather")
+        join(config["out_dir"], "ngrams/counts.feather")
 
 rule embed_articles:
     input:
@@ -37,28 +37,12 @@ rule embed_articles:
         join(config["out_dir"], "embeddings/article_ids.txt"),
     script: "scripts/embed_articles.py"
 
-rule combine_ngram_articles:
-    input:
-        expand(join(config["out_dir"], "ngrams", config["processing"], "{batch}.feather"), batch=batches)
-    output:
-        join(config["out_dir"], "ngrams", "corpus", config["processing"] + ".feather")
-    script:
-        "scripts/combine_articles.py"
-
-rule replace_ngrams:
-    input:
-        join(batch_dir, "{batch}.feather"),
-        join(config["out_dir"], "ngrams/counts.feather")
-    output:
-        join(config["out_dir"], "ngrams", config["processing"], "{batch}.feather")
-    script:
-        "scripts/replace_ngrams.py"
-
 rule combine_ngrams:
     input:
         expand(join(config["out_dir"], "ngrams/counts/{batch}.feather"), batch=batches)
     output:
-        join(config["out_dir"], "ngrams/counts.feather")
+        join(config["out_dir"], "ngrams/counts.feather"),
+        join(config["out_dir"], "ngrams/ngrams.txt")
     script:
         "scripts/combine_ngrams.py"
 

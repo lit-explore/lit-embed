@@ -22,6 +22,10 @@ dat = pd.read_feather(snek.input[0])
 dat.title.fillna("", inplace=True)
 dat.abstract.fillna("", inplace=True)
 
+# load list of n-gram tokens to detect
+with open(snek.config["ngram_input"], "rt", encoding="utf-8") as fp:
+    ngrams = fp.read().split("\n")
+
 # total number of articles
 N = dat.shape[0]
 
@@ -32,7 +36,13 @@ article_ids = dat.id.values.tolist()
 corpus = []
 
 for index, row in dat.iterrows():
-    text = (row.title + " " + row.abstract).lower()    
+    text = (row.title + " " + row.abstract).lower()
+
+    # collapse n-gram tokens using underscores, as before
+    for ngram in ngrams:
+        if ngram in text:
+            text = text.replace(ngram, ngram.replace(" ", "_"))
+
     corpus.append(text)
 
 del dat

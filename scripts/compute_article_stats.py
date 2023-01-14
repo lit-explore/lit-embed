@@ -16,6 +16,10 @@ MIN_TOKEN_LEN = snek.config['tokenization']['min_length']
 # target text? (title, abstract, or both)
 TEXT_SOURCE = snek.config['text_source']
 
+# load list of n-gram tokens to detect
+with open(snek.config["ngram_input"], "rt", encoding="utf-8") as fp:
+    ngrams = fp.read().split("\n")
+
 # match all alphanumeric tokens;
 regex = re.compile(r"[\w\d_]+", re.UNICODE)
 
@@ -31,6 +35,11 @@ for article_id, article in dat.iterrows():
         text = article.abstract.lower()
     else:
         text = article.title.lower() + " " + article.abstract.lower()
+
+    # collapse n-gram tokens using underscores
+    for ngram in ngrams:
+        if ngram in text:
+            text = text.replace(ngram, ngram.replace(" ", "_"))
 
     # get a list of tokens as they appear in the target text
     tokens = [match.group() for match in regex.finditer(text)]
