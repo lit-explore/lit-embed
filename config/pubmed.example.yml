@@ -24,7 +24,7 @@ embedding_dim: 768
 # min/max article batch to process
 batches:
   start: 1000
-  end: 1468
+  end: 1283
 
 # random seed
 random_seed: 321
@@ -48,6 +48,9 @@ cooccurrence:
 # in table of correlated token pairs and to be checked as a possible n-gram
 token_min_cor: 0.15
 
+# known n-gram tokens to treat as single tokens
+ngram_input: "data/n-grams.txt"
+
 # minimum number of times a pair of tokens must appear together in order to be
 # treated as an n-gram
 ngram_min_freq: 100
@@ -63,3 +66,8 @@ filtering:
 # scores
 word_stats:
   moderated_ridf_max_count: 5
+
+# HuggingFace BERT pretrained model to use
+bert:
+  model: "dmis-lab/biobert-v1.1"
+  max_length: 512
