@@ -67,6 +67,11 @@ filtering:
 word_stats:
   moderated_ridf_max_count: 5
 
+# article mini-batch k-means clustering settings
+clustering:
+  num_clusters: 10
+  batch_size: 1024
+
 # HuggingFace BERT pretrained model to use
 bert:
   mode: "allenai/scibert_scivocab_uncased"

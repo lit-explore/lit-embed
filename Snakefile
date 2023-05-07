@@ -16,6 +16,9 @@ batches_allowed = [f"{x:04}" for x in batch_range]
 
 batches = [x for x in batches if x in batches_allowed]
 
+# stat-based embedding names; used in clustering rule
+stat_embeddings = ["frequency", "tfidf", "ridf", "ensemble"]
+
 if len(batches) == 0:
     raise Exception("No input batches found!")
 
@@ -24,6 +27,25 @@ rule all:
         join(config["out_dir"], "embeddings/ensemble.npz"),
         join(config["out_dir"], "ngrams/counts.feather"),
         join(config["out_dir"], "embeddings/bert.parquet"),
+        join(config["out_dir"], "clusters/bert.feather"),
+        expand(join(config["out_dir"], "clusters/{embedding}.feather"), embedding=stat_embeddings)
+
+rule cluster_bert_embeddings:
+    input:
+        join(config["out_dir"], "embeddings/bert.parquet"),
+    output:
+        join(config["out_dir"], "clusters/bert.feather")
+    script:
+        "scripts/cluster_articles.py"
+
+rule cluster_stat_embeddings:
+    input:
+        join(config["out_dir"], "embeddings/{embedding}.npz"),
+        join(config["out_dir"], "embeddings/article_ids.txt")
+    output:
+        join(config["out_dir"], "clusters", "{embedding}.feather")
+    script:
+        "scripts/cluster_articles.py"
 
 rule combine_bert_embeddings:
     input:
