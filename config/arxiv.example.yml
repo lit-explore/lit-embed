@@ -1,0 +1,73 @@
+#
+# lit-embed arXiv example config
+#
+
+# pipeline target ["arxiv"|"pubmed"]
+corpus: "arxiv"
+
+# arxiv data directory;
+# https://github.com/lit-explore/arxiv
+input_dir: "/path/to/arxiv"
+
+# location to write output to
+out_dir: "/path/to/output"
+
+# processing level to use ["raw"|"lemmatized"]
+processing: "raw"
+
+# article text to use ["title"|"abstract"|"both"]
+text_source: "both"
+
+# embedding dimensions
+embedding_dim: 768
+
+# min/max article batch to process
+batches:
+  start: 1
+  end: 100
+
+# random seed
+random_seed: 321
+
+# factors to use to decide whether to exclude an article from analysis
+exclude_articles:
+  missing_abstract: true
+  missing_title: true
+
+tokenization:
+  min_length: 3
+
+# token co-occurence analysis settings
+cooccurrence:
+  # minimum count required for a token to be included in co-occurrence analysis
+  token_min_freq: 10000
+  # when estimating token co-occurrence, number of articles to be randomly sampled
+  subsample_num_articles: 100000
+
+# minimum pearson correlation coefficent required for a token pair to be included
+# in table of correlated token pairs and to be checked as a possible n-gram
+token_min_cor: 0.15
+
+# known n-gram tokens to treat as single tokens
+ngram_input: "data/n-grams.txt"
+
+# minimum number of times a pair of tokens must appear together in order to be
+# treated as an n-gram
+ngram_min_freq: 100
+
+# token filtering settings
+filtering:
+  # minimum ratio of articles that token must appear in
+  min_article_ratio: 0.001
+  # max ratio of articles that token is allowed to appear in
+  max_article_ratio: 0.5
+
+# maximum count contribution of a single article when computing moderated residual IDF
+# scores
+word_stats:
+  moderated_ridf_max_count: 5
+
+# HuggingFace BERT pretrained model to use
+bert:
+  mode: "allenai/scibert_scivocab_uncased"
+  max_length: 512
