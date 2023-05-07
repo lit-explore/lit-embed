@@ -22,9 +22,28 @@ if len(batches) == 0:
 rule all:
     input:
         join(config["out_dir"], "embeddings/ensemble.npz"),
-        join(config["out_dir"], "ngrams/counts.feather")
+        join(config["out_dir"], "ngrams/counts.feather"),
+        join(config["out_dir"], "embeddings/bert.parquet"),
 
-rule embed_articles:
+rule combine_bert_embeddings:
+    input:
+        expand(join(config["out_dir"], "bert/articles/{batch}.parquet"), batch=batches)
+    output:
+        join(config["out_dir"], "embeddings/bert.parquet"),
+    script:
+        "scripts/combine_bert_embeddings.py"
+
+rule create_bert_embeddings:
+    input:
+        join(batch_dir, "{batch}.feather")
+    output:
+        join(config["out_dir"], "bert/articles/{batch}.parquet")
+    resources:
+        load=60
+    script:
+        "scripts/create_bert_embeddings.py"
+
+rule create_stat_embeddings:
     input:
         join(config["input_dir"], "corpus", config["processing"] + ".feather"),
         join(config["out_dir"], "stats/tokens.parquet"),
@@ -35,7 +54,7 @@ rule embed_articles:
         join(config["out_dir"], "embeddings/ensemble.npz"),
         join(config["out_dir"], "embeddings/embedding_tokens.feather"),
         join(config["out_dir"], "embeddings/article_ids.txt"),
-    script: "scripts/embed_articles.py"
+    script: "scripts/create_stat_embeddings.py"
 
 rule combine_ngrams:
     input:

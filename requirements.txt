@@ -1,4 +1,4 @@
-python>=3.9
+python>=3.10
 cudatoolkit
 matplotlib
 numpy
@@ -15,6 +15,7 @@ jupyter
 ipykernel
 ipywidgets
 nb_conda_kernels
+opt_einsum
 stanza
 umap-learn
 huggingface::transformers

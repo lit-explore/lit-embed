@@ -94,37 +94,40 @@ def get_stop_words(lemmatize=False):
     STOP_WORDS = STOP_WORDS + [f"{x:04}" for x in range(2000, 2030)]
 
     # other frequent but less informative words (subjective)
-    STOP_WORDS = STOP_WORDS + ['ability', 'access', 'according', 'add', 'affect', 'aim',
-            'aimed', 'aims', 'analysis', 'applications', 'approach', 'approaches',
-            'article', 'assess', 'assessed', 'associated', 'based', 'better',
-            'challenge', 'challenging', 'com', 'commonly', 'compared', 'consider',
-            'corrigendum', 'current', 'currently', 'demonstrate', 'design', 'determine',
-            'different', 'discuss', 'effect', 'effective', 'effects', 'erratum',
-            'especially', 'evaluate', 'evidence', 'examined', 'existing', 'experience',
-            'findings', 'focus', 'following', 'furthermore', 'given', 'healthy', 'http', 'https',
-            'identified', 'important', 'including', 'induced', 'investigate',
-            'investigated', 'key', 'known', 'like', 'main', 'mathbb', 'mathcal',
-            'mathrm', 'method', 'methods', 'need', 'new', 'non', 'novel', 'observed',
-            'obtain', 'obtained', 'org', 'outcome', 'overview', 'paper', 'particular',
-            'performance', 'performed', 'possible', 'presence', 'present', 'problem',
-            'problems', 'properties', 'propose', 'proposed', 'prove', 'provide',
-            'range', 'recent', 'related', 'relationship', 'report', 'research',
-            'respectively', 'result', 'results', 'revealed', 'review', 'role', 'set',
-            'showed', 'shown', 'significant', 'significantly', 'solution', 'solutions',
-            'studies', 'study', 'technique', 'test', 'theory', 'thing', 'try', 'type',
-            'use', 'useful', 'value', 'values', 'way', 'work', 'www', 'year']
+    STOP_WORDS = STOP_WORDS + ['ability', 'able', 'accuracy', 'access', 'according', 'account', 'achieve', 'administration',
+                               'add', 'addition', 'additional', 'affect', 'affected', 'affects',
+                               'aim', 'aimed', 'aims', 'allow',
+                               'analysis', 'analyze', 'applications', 'approach', 'approaches', 'article',
+                               'assess', 'assessed', 'associated', 'based', 'best', 'better',
+                               'challenge', 'challenging', 'characterized', 'characterization', 'com', 'common',
+                               'commonly', 'compared', 'consider', 'corrigendum', 'crucial',
+                               'current', 'currently', 'demonstrate', 'described', 'design',
+                               'determine', 'different', 'discuss', 'discussed', 'effect', 'effective',
+                               'effects', 'erratum', 'especially', 'evaluate', 'evidence',
+                               'examined', 'existing', 'experience', 'finally', 'findings', 'focus',
+                               'following', 'furthermore', 'given', 'healthy', 'http', 'https',
+                               'identified', 'implications', 'important', 'improve', 'included', 'including',
+                               'induced', 'introduce', 'introduced', 'investigate', 'investigated', 'key', 'known', 'left',
+                               'like', 'main', 'materials', 'mathbb', 'mathcal', 'mathrm', 'method', 'methods',
+                               'need', 'needs', 'new', 'non', 'novel', 'objective', 'observed',
+                               'obtain', 'obtained', 'org', 'outcome', 'overview', 'paper',
+                               'particular', 'performance', 'performed', 'possible', 'presence',
+                               'present', 'problem', 'problems', 'properties', 'propose',
+                               'proposed', 'prove', 'provide', 'purpose', 'range', 'recent',
+                               'related', 'relationship', 'report', 'research', 'respectively',
+                               'result', 'results', 'resulting', 'revealed', 'review', 'role', 'set', 'showed',
+                               'shown', 'significant', 'significantly', 'solution', 'solutions',
+                               'studies', 'study', 'technique', 'test', 'theory', 'thing', 'try',
+                               'type', 'use', 'useful', 'value', 'values', 'way', 'work', 'www',
+                               'year']
 
     # lemmatize?
     if lemmatize:
         import stanza
 
         # create lemmatized version of stopwords
-        try:
-            nlp = stanza.Pipeline(lang='en', processors='tokenize,pos,lemma')
-        except:
-            print("Downloading Stanza English language models for new install..")
-            stanza.download('en')
-            nlp = stanza.Pipeline(lang='en', processors='tokenize,pos,lemma')
+        nlp = stanza.Pipeline(lang='en', processors='tokenize,pos,lemma',
+                              download_method=stanza.DownloadMethod.REUSE_RESOURCES)
 
         doc = nlp(" ".join(STOP_WORDS))
 
