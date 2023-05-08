@@ -2,9 +2,9 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python
+  - python>=3.10
   - datashader
-  - numpy==1.21.5
+  - numpy
   - pandas
   - seaborn
   - pyarrow

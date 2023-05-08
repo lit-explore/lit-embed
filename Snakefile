@@ -18,6 +18,7 @@ batches = [x for x in batches if x in batches_allowed]
 
 # stat-based embedding names; used in clustering rule
 stat_embeddings = ["frequency", "tfidf", "ridf", "ensemble"]
+all_embeddings = stat_embeddings + ["bert"]
 
 if len(batches) == 0:
     raise Exception("No input batches found!")
@@ -28,7 +29,35 @@ rule all:
         join(config["out_dir"], "ngrams/counts.feather"),
         join(config["out_dir"], "embeddings/bert.parquet"),
         join(config["out_dir"], "clusters/bert.feather"),
-        expand(join(config["out_dir"], "clusters/{embedding}.feather"), embedding=stat_embeddings)
+        expand(join(config["out_dir"], "clusters/{embedding}.feather"), embedding=stat_embeddings),
+        join(config["out_dir"], "umap/bert.feather"),
+        expand(join(config["out_dir"], "umap/{embedding}.feather"), embedding=stat_embeddings),
+        expand(join(config["out_dir"], "figures/{embedding}_umap.png"), embedding=all_embeddings)
+        # join(config["out_dir"], "figures/bert_umap.png"),
+        # expand(join(config["out_dir"], "figures/{embedding}_umap.png"), embedding=stat_embeddings)
+
+rule visualize_embeddings:
+    input:
+        # join(config["out_dir"], "embeddings/bert.parquet"),
+        join(config["out_dir"], "umap/{embedding}.feather"),
+        join(config["out_dir"], "clusters/{embedding}.feather"),
+    output:
+        join(config["out_dir"], "figures/{embedding}_umap.png"),
+    conda:
+        "envs/datashader.yml"
+    script:
+        "scripts/plot_datashader.py"
+
+# rule visualize_stat_embeddings:
+#     input:
+#         join(config["out_dir"], "embeddings/{embedding}.npz"),
+#         join(config["out_dir"], "clusters/{embedding}.feather")
+#     output:
+#         join(config["out_dir"], "figures/{embedding}_umap.png"),
+#     conda:
+#         "envs/datashader.yml"
+#     script:
+#         "scripts/plot_datashader.py"
 
 rule cluster_bert_embeddings:
     input:
@@ -46,6 +75,23 @@ rule cluster_stat_embeddings:
         join(config["out_dir"], "clusters", "{embedding}.feather")
     script:
         "scripts/cluster_articles.py"
+
+rule bert_embedding_umap: 
+    input:
+        join(config["out_dir"], "embeddings/bert.parquet"),
+    output:
+        join(config["out_dir"], "umap/bert.feather")
+    script:
+        "scripts/project_umap.py"
+
+rule stat_embedding_umap:
+    input:
+        join(config["out_dir"], "embeddings/{embedding}.npz"),
+        join(config["out_dir"], "embeddings/article_ids.txt")
+    output:
+        join(config["out_dir"], "umap", "{embedding}.feather")
+    script:
+        "scripts/project_umap.py"
 
 rule combine_bert_embeddings:
     input:
