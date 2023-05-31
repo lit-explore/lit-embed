@@ -22,12 +22,11 @@ max_articles = snek.config['datashader']['max_articles']
 
 if max_articles < dat.shape[0]:
     ind = random.sample(range(dat.shape[0]), max_articles)
-
     dat = dat.iloc[ind]
-    clusters = clusters.iloc[ind]
 
 # add cluster assignments to projected data
-dat["cluster"] = clusters.cluster.astype("category")
+#dat["cluster"] = clusters.cluster.astype("category")
+dat["cluster"] = clusters.loc[dat.index].cluster.astype("category")
 
 cluster_labels = set(clusters.cluster.values)
 
@@ -46,9 +45,20 @@ else:
 
 color_key = dict(zip(cluster_labels, pal))
 
+# clip outliers to improve resolution for most of the data points..
+#x.UMAP1.quantile(0.005)
+min_x = dat.UMAP1.quantile(1 - snek.config["datashader"]["clip_quantile"])
+max_x = dat.UMAP1.quantile(snek.config["datashader"]["clip_quantile"])
+min_y = dat.UMAP2.quantile(1 - snek.config["datashader"]["clip_quantile"])
+max_y = dat.UMAP2.quantile(snek.config["datashader"]["clip_quantile"])
+
 canvas = ds.Canvas(plot_width=snek.config['datashader']['width'], 
-                   plot_height=snek.config['datashader']['height'])
+                   plot_height=snek.config['datashader']['height'],
+                   x_range=(min_x, max_x,),
+                   y_range=(min_y, max_y,))
+
 agg = canvas.points(dat, dat.columns[0], dat.columns[1], ds.count_cat("cluster"))
+
 img = tf.shade(agg, color_key=color_key, how="eq_hist")
 
 utils.export_image(img, filename=snek.output[0].replace('.png', ''), background="black")

@@ -16,7 +16,9 @@ random.seed(snek.config["random_seed"])
 
 if snek.input[0].endswith(".npz"):
     dat = scipy.sparse.load_npz(snek.input[0])
-    #dat = pd.DataFrame(dat.todense())
+
+    with open(snek.input[1], "rt", encoding="utf-8") as fp:
+        article_ids = pd.Series(fp.read().split())
 else:
     dat = pd.read_parquet(snek.input[0]).set_index("article_id")
 
@@ -38,11 +40,12 @@ if max_articles < dat.shape[0]:
     elif isinstance(dat, scipy.sparse.csr_matrix):
         # sparse matrix
         dat = dat[ind, :]
+        article_ids = article_ids[ind]
 
 # convert sparse matrix to dense
 if isinstance(dat, scipy.sparse.csr_matrix):
     print("Converting sparse matrix to dense matrix")
-    dat = pd.DataFrame(dat.todense())
+    dat = pd.DataFrame(dat.todense(), index=article_ids)
 
 # remove any articles with zero variance
 print("Checking for articles with zero variance..")

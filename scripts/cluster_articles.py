@@ -35,4 +35,6 @@ res = pd.DataFrame({"article_id": article_ids, "cluster": cluster_labels})
 if res.index.duplicated().sum() > 0:
     raise Exception("Encountered duplicate article IDs!")
 
+res["cluster"] = res["cluster"].astype("category")
+
 res.to_feather(snek.output[0])
