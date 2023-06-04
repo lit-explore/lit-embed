@@ -89,5 +89,5 @@ datashader:
 
 # HuggingFace BERT pretrained model to use
 bert:
-  mode: "allenai/scibert_scivocab_uncased"
+  model: "allenai/scibert_scivocab_uncased"
   max_length: 512
