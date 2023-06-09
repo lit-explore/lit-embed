@@ -33,12 +33,9 @@ rule all:
         join(config["out_dir"], "umap/bert.feather"),
         expand(join(config["out_dir"], "umap/{embedding}.feather"), embedding=stat_embeddings),
         expand(join(config["out_dir"], "figures/{embedding}_umap.png"), embedding=all_embeddings)
-        # join(config["out_dir"], "figures/bert_umap.png"),
-        # expand(join(config["out_dir"], "figures/{embedding}_umap.png"), embedding=stat_embeddings)
 
 rule visualize_embeddings:
     input:
-        # join(config["out_dir"], "embeddings/bert.parquet"),
         join(config["out_dir"], "umap/{embedding}.feather"),
         join(config["out_dir"], "clusters/{embedding}.feather"),
     output:
@@ -47,17 +44,6 @@ rule visualize_embeddings:
         "envs/datashader.yml"
     script:
         "scripts/plot_datashader.py"
-
-# rule visualize_stat_embeddings:
-#     input:
-#         join(config["out_dir"], "embeddings/{embedding}.npz"),
-#         join(config["out_dir"], "clusters/{embedding}.feather")
-#     output:
-#         join(config["out_dir"], "figures/{embedding}_umap.png"),
-#     conda:
-#         "envs/datashader.yml"
-#     script:
-#         "scripts/plot_datashader.py"
 
 rule cluster_bert_embeddings:
     input:
