@@ -206,6 +206,7 @@ biopsy needle
 bipartite entanglement
 bipartite graphs
 bipolar disorder
+birth weight
 black box
 black hole
 black holes
@@ -219,6 +220,7 @@ blood pressure
 blood transfusion
 blood vessels
 blot assay
+body composition
 body mass
 body mass index
 body weight
@@ -304,6 +306,7 @@ cas9 knockout
 case man
 case patient
 case presented
+case series
 catalytic reaction
 catalyzed reaction
 catheter ablation
@@ -320,6 +323,7 @@ cell expression
 cell immune
 cell lines
 cell lung cancer
+cell lymphoma
 cell migration
 cell proliferation
 cell protein
@@ -346,6 +350,7 @@ cerebral ischemic
 cerebral palsy
 cerebral stroke
 cerebrospinal fluid
+cervical cancer
 cervical spine
 cft correspondence
 chain fatty acids
@@ -393,6 +398,7 @@ clinical diagnosis
 clinical patients
 clinical practice
 clinical treatment
+clinical trial
 clinical trials
 closed loop
 cloud computing
@@ -435,6 +441,7 @@ community dwelling
 commutative algebra
 companion star
 completed questionnaire
+complete genome
 composites reinforced
 compressed sensing
 compressive strength
@@ -460,6 +467,7 @@ contaminated soil
 contaminated soils
 continuum emission
 control group
+controlled double
 controlled randomized
 controlled trial
 controlled trials
@@ -504,6 +512,7 @@ cosmological constant
 cosmological dark
 cosmological matter
 cosmological redshift
+cost effectiveness
 counting kit
 covid infection
 covid pandemic
@@ -729,6 +738,7 @@ endovascular aneurysm
 endovascular aortic
 endovascular embolization
 endovascular stent
+end stage
 engineering scaffolds
 english language
 entangled bell
@@ -749,6 +759,7 @@ equation modeling
 equivariant cohomology
 escherichia coli
 esophageal squamous
+essential oil
 estrogen receptor
 ethics committee
 ethnic disparities
@@ -815,6 +826,7 @@ fine grained
 fine needle
 fine tuning
 finite element
+finite temperature
 finitely generated
 flap reconstruction
 flavor neutrino
@@ -1001,6 +1013,7 @@ health pandemic
 health services
 hearing loss
 heart failure
+heart rate
 heat shock
 heat temperature
 heavy hadron
@@ -1024,6 +1037,9 @@ higgs boson
 higgs bosons
 higgs couplings
 higgs sector
+higher order
+highly efficient
+highly sensitive
 high resolution
 high throughput
 hilbert space
@@ -1234,6 +1250,7 @@ large scale
 laser pulse
 laser pulses
 late early
+late onset
 lateral medial
 lateral sclerosis
 lattice qcd
@@ -1343,6 +1360,7 @@ lymph node
 lymph node dissection
 lymph node metastasis
 lymph nodes
+lymphoma cell
 machine classifier
 machine learning
 machine learning algorithms
@@ -1422,6 +1440,7 @@ mechanism underlying
 medial prefrontal
 medial tibial
 median age
+medical students
 medication adherence
 medicinal plants
 medline databases
@@ -1533,6 +1552,7 @@ nanoparticles loaded
 nasopharyngeal carcinoma
 national institute
 national survey
+nationwide cohort
 natural killer
 natural language
 naturally occurring
@@ -1599,6 +1619,7 @@ nucleotide polymorphism
 nucleotide polymorphisms
 numerical simulation
 numerical simulations
+nursing home
 nursing homes
 nursing students
 objective optimization
@@ -1639,12 +1660,14 @@ optical tomography
 optical wavelength
 optic nerve
 optic neuropathy
+optimal control
 optimization algorithm
 optimization algorithms
 optimization objective
 orally administered
 orbital period
 ordinary differential
+organic framework
 organic frameworks
 organic matter
 organic metal
@@ -1652,6 +1675,7 @@ organic pollutants
 orthodontic tooth
 osteogenic differentiation
 outer membrane
+ovarian cancer
 overall survival
 overexpression inhibited
 overexpression reversed
@@ -1669,6 +1693,7 @@ paid attention
 pain relief
 palliative care
 pancreatic adenocarcinoma
+pancreatic cancer
 pancreatic ductal
 pandemic coronavirus
 pandemic cov
@@ -1698,6 +1723,7 @@ pathway expression
 pathway signaling
 patient care
 patient case
+patient reported
 patients clinical
 patients undergoing
 patients undergoing surgery
@@ -1728,6 +1754,7 @@ photometric survey
 photon emission
 photonic crystal
 phylogenetic tree
+physical activity
 phys rev
 pi3k pathway
 pi3k signaling
@@ -1790,6 +1817,7 @@ preterm birth
 preterm born
 preterm infants
 preterm neonates
+primary care
 primordial inflation
 primordial universe
 principal component
@@ -1834,6 +1862,7 @@ pubmed databases
 pubmed search
 pulmonary embolism
 pulmonary fibrosis
+pulmonary hypertension
 pulsar radio
 pulsar timing
 pulsar wind
@@ -1963,6 +1992,7 @@ regulated expression
 regulated transcription
 regulates expression
 regulating expression
+regulating mir
 reinforced composites
 reinforced concrete
 reinforcement learning
@@ -2105,6 +2135,7 @@ severe cov
 severe covid
 severe respiratory
 severe sars
+sex differences
 sexually transmitted
 sexual violence
 shear stress
@@ -2203,6 +2234,7 @@ squamous carcinoma
 squamous cell
 square error
 square root
+stage end
 standard deviation
 standard higgs
 staphylococcus aureus
@@ -2297,6 +2329,7 @@ takes place
 taking account
 tandem mass
 targeted therapies
+targeting mir
 targeting therapeutic
 target therapeutic
 task learning
@@ -2346,6 +2379,7 @@ tight binding
 tight junction
 tight junctions
 time consuming
+time dependent
 tio titanium
 tissue regeneration
 titanium alloy
