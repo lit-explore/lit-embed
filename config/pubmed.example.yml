@@ -91,3 +91,5 @@ datashader:
 bert:
   model: "dmis-lab/biobert-v1.1"
   max_length: 512
+  # whether or not to lowercase corpus prior to embedding
+  lowercase_corpus: false

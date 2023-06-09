@@ -32,18 +32,26 @@ N = dat.shape[0]
 # get list of article ids
 article_ids = dat.id.values.tolist()
 
+TEXT_SOURCE:str = snek.config["text_source"]
+
 # combine lowercase title + abstract to form corpus
 corpus = []
 
-for index, row in dat.iterrows():
-    text = (row.title + " " + row.abstract).lower()
+for index, article in dat.iterrows():
+    # extract target text
+    if TEXT_SOURCE == "title":
+        doc = article.title.lower()
+    elif TEXT_SOURCE == "abstract":
+        doc = article.abstract.lower()
+    else:
+        doc = article.title.lower() + " " + article.abstract.lower()
 
     # collapse n-gram tokens using underscores, as before
     for ngram in ngrams:
-        if ngram in text:
-            text = text.replace(ngram, ngram.replace(" ", "_"))
+        if ngram in doc:
+            doc = doc.replace(ngram, ngram.replace(" ", "_"))
 
-    corpus.append(text)
+    corpus.append(doc)
 
 del dat
 

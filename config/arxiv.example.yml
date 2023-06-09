@@ -91,3 +91,5 @@ datashader:
 bert:
   model: "allenai/scibert_scivocab_uncased"
   max_length: 512
+  # whether or not to lowercase corpus prior to embedding
+  lowercase_corpus: false

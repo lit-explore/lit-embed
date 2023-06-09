@@ -36,11 +36,24 @@ if snek.config['exclude_articles']['missing_title']:
 dat.title.fillna("", inplace=True)
 dat.abstract.fillna("", inplace=True)
 
+TEXT_SOURCE:str = snek.config["text_source"]
+LOWERCASE:bool = snek.config["bert"]["lowercase_corpus"]
+
 # combine title & abstract for each article to construct corpus
 corpus = []
 
 for ind, article in dat.iterrows():
-    doc = article.title + " " + article.abstract
+    # extract target text
+    if TEXT_SOURCE == "title":
+        doc = article.title
+    elif TEXT_SOURCE == "abstract":
+        doc = article.abstract
+    else:
+        doc = article.title + " " + article.abstract
+
+    if LOWERCASE:
+        doc = doc.lower()
+
     doc = doc.replace('\n', ' ')
     corpus.append(doc)
 
