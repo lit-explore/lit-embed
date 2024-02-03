@@ -69,6 +69,7 @@ with torch.no_grad():
     model = model.to(device)
 
     for doc in tqdm(corpus):
+        # split text into sentences
         sentences = nltk.sent_tokenize(doc)
 
         inputs = tokenizer(sentences, padding=True, max_length=max_len, truncation=True,

@@ -1,4 +1,4 @@
-python>=3.10
+python>=3.9
 cudatoolkit
 matplotlib
 numpy
@@ -18,5 +18,5 @@ nb_conda_kernels
 opt_einsum
 stanza
 umap-learn
-huggingface::transformers
-pytorch::pytorch
+pytorch
+conda-forge::transformers

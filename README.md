@@ -4,7 +4,7 @@ lit-embed
 Overview
 --------
 
-![BioBERT vs. TF-IDF UMAP (1m PubMed articles)](extra/biobert_vs_tfidf_lemmatized_1m_articles.png)
+![BioBERT vs. TF-IDF UMAP (750k PubMed articles)](extra/biobert_vs_tfidf_pubmed_750k.png)
 
 `lit-embed` is a computational pipeline developed to explore alternative approaches for
 embedding science articles, to detect informative terms associated with different fields of 
